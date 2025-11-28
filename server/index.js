@@ -1,0 +1,48 @@
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { testConnection } = require('./config/database');
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Logging middleware để debug
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`, req.query);
+  next();
+});
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/wallet', require('./routes/wallet'));
+app.use('/api/inventory', require('./routes/inventory'));
+
+const PORT = process.env.PORT || 5000;
+
+// Start server với test connection
+async function startServer() {
+  const connected = await testConnection();
+  
+  if (!connected) {
+    console.error('\n⚠️  Server vẫn sẽ khởi động nhưng có thể gặp lỗi khi sử dụng database.');
+    console.error('   Vui lòng kiểm tra kết nối database trước khi sử dụng.\n');
+  }
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+  });
+}
+
+startServer();
+

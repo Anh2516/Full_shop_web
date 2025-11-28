@@ -1,0 +1,27 @@
+HƯỚNG DẪN TẠO FILE .ENV
+================================
+
+1. Tạo file .env trong thư mục server/
+
+2. Copy nội dung sau vào file .env:
+
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=shopweb_db
+JWT_SECRET=your_secret_key_here_change_in_production
+JWT_EXPIRE=7d
+
+3. QUAN TRỌNG: 
+   - Nếu MySQL của bạn CÓ MẬT KHẨU, thay thế DB_PASSWORD= bằng DB_PASSWORD=mat_khau_cua_ban
+   - Nếu MySQL KHÔNG CÓ MẬT KHẨU, giữ nguyên DB_PASSWORD= (để trống)
+
+4. Lưu file và khởi động lại server
+
+Ví dụ nếu MySQL có mật khẩu là "123456":
+DB_PASSWORD=123456
+
+Ví dụ nếu MySQL không có mật khẩu:
+DB_PASSWORD=
+
