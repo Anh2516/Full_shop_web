@@ -2,20 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
-import { 
-  FaShoppingBag, 
-  FaChartLine, 
-  FaBox, 
-  FaShoppingCart, 
-  FaUsers, 
-  FaWarehouse,
-  FaHistory,
-  FaWallet,
-  FaUser,
-  FaSignOutAlt,
-  FaSignInAlt,
-  FaUserPlus
-} from 'react-icons/fa';
+import Icon from '../common/Icon';
 import './Navbar.css';
 import { formatCurrency } from '../../utils/currency';
 
@@ -32,25 +19,25 @@ const Navbar = () => {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const baseLinks = [{ to: '/products', label: 'Sản phẩm', icon: FaShoppingBag }];
+  const baseLinks = [{ to: '/products', label: 'Sản phẩm', icon: 'shoppingBag' }];
   let navLinks = baseLinks;
 
   if (isAuthenticated) {
     if (user?.role === 'admin') {
       navLinks = [
         ...baseLinks,
-        { to: '/admin', label: 'Dashboard', icon: FaChartLine },
-        { to: '/admin/products', label: 'QL sản phẩm', icon: FaBox },
-        { to: '/admin/orders', label: 'QL đơn hàng', icon: FaShoppingCart },
-        { to: '/admin/users', label: 'QL người dùng', icon: FaUsers },
-        { to: '/admin/inventory', label: 'QL nhập kho', icon: FaWarehouse }
+        { to: '/admin', label: 'Dashboard', icon: 'chartLine' },
+        { to: '/admin/products', label: 'QL sản phẩm', icon: 'box' },
+        { to: '/admin/orders', label: 'QL đơn hàng', icon: 'shoppingCart' },
+        { to: '/admin/users', label: 'QL người dùng', icon: 'users' },
+        { to: '/admin/inventory', label: 'QL nhập kho', icon: 'warehouse' }
       ];
     } else {
       navLinks = [
         ...baseLinks,
-        { to: '/orders/history', label: 'Đơn hàng', icon: FaHistory },
-        { to: '/wallet', label: 'Nạp tiền', icon: FaWallet },
-        { to: '/cart', label: 'Giỏ hàng', icon: FaShoppingCart }
+        { to: '/orders/history', label: 'Đơn hàng', icon: 'history' },
+        { to: '/wallet', label: 'Nạp tiền', icon: 'wallet' },
+        { to: '/cart', label: 'Giỏ hàng', icon: 'shoppingCart' }
       ];
     }
   }
@@ -68,25 +55,25 @@ const Navbar = () => {
               <>
                 {user?.role !== 'admin' && typeof user?.balance !== 'undefined' && (
                   <span className="navbar-balance" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <FaWallet /> Số dư: {formatCurrency(user.balance)}
+                    <Icon name="wallet" size={16} /> Số dư: {formatCurrency(user.balance)}
                   </span>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Link to="/profile" className="navbar-user" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <FaUser /> Xin chào, {user?.name}
+                    <Icon name="user" size={16} /> Xin chào, {user?.name}
                   </Link>
                   <button onClick={handleLogout} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <FaSignOutAlt /> Đăng xuất
+                    <Icon name="signOut" size={16} /> Đăng xuất
                   </button>
                 </div>
               </>
             ) : (
               <>
                 <Link to="/login" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FaSignInAlt /> Đăng nhập
+                  <Icon name="signIn" size={16} /> Đăng nhập
                 </Link>
                 <Link to="/register" className="btn btn-success" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FaUserPlus /> Đăng ký
+                  <Icon name="userPlus" size={16} /> Đăng ký
                 </Link>
               </>
             )}
@@ -95,18 +82,15 @@ const Navbar = () => {
         
         {/* Hàng 2: Menu Links */}
         <div className="navbar-menu">
-          {navLinks.map(link => {
-            const IconComponent = link.icon;
-            return (
-              <Link key={link.to} to={link.to} className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <IconComponent />
-                {link.label}
-                {link.to === '/cart' && cartItemCount > 0 && (
-                  <span className="cart-badge">{cartItemCount}</span>
-                )}
-              </Link>
-            );
-          })}
+          {navLinks.map(link => (
+            <Link key={link.to} to={link.to} className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name={link.icon} size={16} />
+              {link.label}
+              {link.to === '/cart' && cartItemCount > 0 && (
+                <span className="cart-badge">{cartItemCount}</span>
+              )}
+            </Link>
+          ))}
         </div>
       </div>
     </nav>

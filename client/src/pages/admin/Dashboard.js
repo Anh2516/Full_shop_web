@@ -2,16 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { 
-  FaUsers, 
-  FaBox, 
-  FaShoppingCart, 
-  FaDollarSign, 
-  FaChartLine, 
-  FaWallet, 
-  FaCalendarDay,
-  FaTrophy
-} from 'react-icons/fa';
+import Icon from '../../components/common/Icon';
 import SimpleLineChart from '../../components/charts/SimpleLineChart';
 import SimpleBarChart from '../../components/charts/SimpleBarChart';
 import BackButton from '../../components/common/BackButton';
@@ -81,49 +72,49 @@ const Dashboard = () => {
     { 
       title: 'Tổng người dùng', 
       value: stats.totalUsers, 
-      icon: FaUsers, 
+      icon: 'users', 
       color: '#007bff',
       bgColor: '#e7f3ff'
     },
     { 
       title: 'Tổng sản phẩm', 
       value: stats.totalProducts, 
-      icon: FaBox, 
+      icon: 'box', 
       color: '#28a745',
       bgColor: '#e6f4ea'
     },
     { 
       title: 'Tổng đơn hàng', 
       value: stats.totalOrders, 
-      icon: FaShoppingCart, 
+      icon: 'shoppingCart', 
       color: '#ffc107',
       bgColor: '#fff8e1'
     },
     { 
       title: 'Doanh thu', 
       value: formatCurrency(stats.totalRevenue), 
-      icon: FaDollarSign, 
+      icon: 'dollarSign', 
       color: '#17a2b8',
       bgColor: '#e0f7fa'
     },
     { 
       title: 'Lợi nhuận', 
       value: formatCurrency(stats.profit), 
-      icon: FaChartLine, 
+      icon: 'chartLine', 
       color: '#28a745',
       bgColor: '#e6f4ea'
     },
     { 
       title: 'Số dư khách hàng', 
       value: formatCurrency(stats.totalBalance), 
-      icon: FaWallet, 
+      icon: 'wallet', 
       color: '#6f42c1',
       bgColor: '#f3e5f5'
     },
     { 
       title: 'Đơn hàng hôm nay', 
       value: stats.recentOrders, 
-      icon: FaCalendarDay, 
+      icon: 'calendarDay', 
       color: '#dc3545',
       bgColor: '#fdecea'
     }
@@ -134,44 +125,41 @@ const Dashboard = () => {
       <div className="container">
         <BackButton />
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaChartLine style={{ color: '#007bff' }} />
+          <Icon name="chartLine" size={24} color="#007bff" />
           Dashboard Admin
         </h1>
         
         {/* Stat Cards */}
         <div className="stats-grid">
-          {statCards.map((card, index) => {
-            const IconComponent = card.icon;
-            return (
-              <div key={index} className="stat-card" style={{ 
-                borderLeft: `4px solid ${card.color}`,
-                backgroundColor: '#fff'
+          {statCards.map((card, index) => (
+            <div key={index} className="stat-card" style={{ 
+              borderLeft: `4px solid ${card.color}`,
+              backgroundColor: '#fff'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                marginBottom: '15px'
               }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  marginBottom: '15px'
+                <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>{card.title}</h3>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  backgroundColor: card.bgColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
-                  <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>{card.title}</h3>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '8px',
-                    backgroundColor: card.bgColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <IconComponent style={{ color: card.color, fontSize: '20px' }} />
-                  </div>
+                  <Icon name={card.icon} size={20} color={card.color} />
                 </div>
-                <p className="stat-value" style={{ color: card.color, margin: 0 }}>
-                  {card.value}
-                </p>
               </div>
-            );
-          })}
+              <p className="stat-value" style={{ color: card.color, margin: 0 }}>
+                {card.value}
+              </p>
+            </div>
+          ))}
         </div>
 
         {/* Charts Section */}
@@ -195,7 +183,7 @@ const Dashboard = () => {
               marginBottom: '20px'
             }}>
               <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FaDollarSign style={{ color: '#28a745' }} />
+                <Icon name="dollarSign" size={20} color="#28a745" />
                 Doanh thu theo thời gian
               </h2>
               <select
@@ -232,7 +220,7 @@ const Dashboard = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
           }}>
             <h2 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FaShoppingCart style={{ color: '#ffc107' }} />
+              <Icon name="shoppingCart" size={20} color="#ffc107" />
               Số đơn hàng theo thời gian
             </h2>
             <div style={{ height: '300px' }}>
@@ -251,7 +239,7 @@ const Dashboard = () => {
         {bestSellers.length > 0 && (
           <div className="best-seller-section" style={{ marginTop: '40px' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <FaTrophy style={{ color: '#ffc107' }} />
+              <Icon name="trophy" size={20} color="#ffc107" />
               Sản phẩm bán chạy
             </h2>
             <div className="best-seller-grid">
@@ -276,7 +264,7 @@ const Dashboard = () => {
                       fontSize: '14px',
                       boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
-                      <FaTrophy />
+                      <Icon name="trophy" size={16} color="#fff" />
                     </div>
                   )}
                   <img src={product.image || '/placeholder.jpg'} alt={product.name} />
@@ -289,7 +277,7 @@ const Dashboard = () => {
                       color: '#28a745',
                       fontWeight: 'bold'
                     }}>
-                      <FaShoppingCart /> Đã bán: {product.total_sold}
+                      <Icon name="shoppingCart" size={16} color="#28a745" /> Đã bán: {product.total_sold}
                     </p>
                   </div>
                 </div>
