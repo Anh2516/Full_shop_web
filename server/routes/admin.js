@@ -50,6 +50,38 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// Lấy dữ liệu doanh thu theo thời gian
+router.get('/revenue-chart', async (req, res) => {
+  try {
+    const { period = '7' } = req.query; // 7, 30, hoặc 365 ngày
+    
+    let dateCondition = '';
+    if (period === '7') {
+      dateCondition = 'DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)';
+    } else if (period === '30') {
+      dateCondition = 'DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)';
+    } else if (period === '365') {
+      dateCondition = 'DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)';
+    }
+
+    const [revenueData] = await db.execute(
+      `SELECT 
+        DATE(created_at) as date,
+        SUM(total) as revenue,
+        COUNT(*) as orders
+       FROM orders 
+       WHERE status = 'completed' AND ${dateCondition}
+       GROUP BY DATE(created_at)
+       ORDER BY date ASC`
+    );
+
+    res.json({ data: revenueData });
+  } catch (error) {
+    console.error('Lỗi lấy dữ liệu chart:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 // Quản lý categories
 router.get('/categories', async (req, res) => {
   try {
