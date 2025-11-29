@@ -69,11 +69,11 @@ INSERT INTO products (name, description, price, stock, category_id, image, is_vi
 
 -- Thêm orders mẫu
 INSERT INTO orders (user_id, total, shipping_address, payment_method, payment_gateway, status) VALUES
-(2, 29990000, '456 Đường XYZ, Quận 2, TP.HCM', 'cod', 'cod', 'completed'),
-(2, 6990000, '456 Đường XYZ, Quận 2, TP.HCM', 'cod', 'momo', 'shipped'),
-(3, 19990000, '789 Đường DEF, Quận 3, TP.HCM', 'cod', 'vnpay', 'processing'),
-(3, 2990000, '789 Đường DEF, Quận 3, TP.HCM', 'cod', 'cod', 'pending'),
-(4, 59990000, '321 Đường GHI, Quận 4, TP.HCM', 'cod', 'paypal', 'completed');
+(2, 29990000, '456 Đường XYZ, Quận 2, TP.HCM', 'wallet', 'wallet', 'completed'),
+(2, 6990000, '456 Đường XYZ, Quận 2, TP.HCM', 'wallet', 'wallet', 'shipped'),
+(3, 19990000, '789 Đường DEF, Quận 3, TP.HCM', 'wallet', 'wallet', 'processing'),
+(3, 2990000, '789 Đường DEF, Quận 3, TP.HCM', 'wallet', 'wallet', 'pending'),
+(4, 59990000, '321 Đường GHI, Quận 4, TP.HCM', 'wallet', 'wallet', 'completed');
 
 -- Thêm order_items mẫu
 INSERT INTO order_items (order_id, product_id, quantity, price) VALUES

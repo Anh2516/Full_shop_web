@@ -16,6 +16,7 @@ import AdminUsers from './pages/admin/Users';
 import AdminInventory from './pages/admin/Inventory';
 import Wallet from './pages/Wallet';
 import MyOrders from './pages/MyOrders';
+import Profile from './pages/Profile';
 import PrivateRoute from './components/routing/PrivateRoute';
 import AdminRoute from './components/routing/AdminRoute';
 import './App.css';
@@ -42,6 +43,7 @@ function App() {
         <Route path="/cart" element={<PrivateRoute allowAdmin={false}><Cart /></PrivateRoute>} />
         <Route path="/wallet" element={<PrivateRoute allowAdmin={false}><Wallet /></PrivateRoute>} />
         <Route path="/orders/history" element={<PrivateRoute allowAdmin={false}><MyOrders /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
         <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />

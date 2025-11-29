@@ -135,5 +135,82 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
+// Cập nhật thông tin user hiện tại
+router.put('/me', verifyToken, [
+  body('email').optional().isEmail().withMessage('Email không hợp lệ'),
+  body('password').optional().isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+  body('name').optional().notEmpty().withMessage('Tên không được để trống')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.user.userId;
+    const { email, password, name, phone, address } = req.body;
+
+    // Lấy thông tin user hiện tại
+    const [existing] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy user' });
+    }
+
+    // Kiểm tra email trùng lặp nếu có thay đổi
+    if (email && email !== existing[0].email) {
+      const [emailCheck] = await db.execute('SELECT id FROM users WHERE email = ? AND id != ?', [email, userId]);
+      if (emailCheck.length > 0) {
+        return res.status(400).json({ message: 'Email đã được sử dụng' });
+      }
+    }
+
+    // Cập nhật các trường
+    const updates = [];
+    const updateValues = [];
+
+    if (email !== undefined) {
+      updates.push('email = ?');
+      updateValues.push(email);
+    }
+    if (name !== undefined) {
+      updates.push('name = ?');
+      updateValues.push(name);
+    }
+    if (phone !== undefined) {
+      updates.push('phone = ?');
+      updateValues.push(phone);
+    }
+    if (address !== undefined) {
+      updates.push('address = ?');
+      updateValues.push(address);
+    }
+
+    if (updates.length > 0) {
+      updateValues.push(userId);
+      await db.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, updateValues);
+    }
+
+    // Cập nhật mật khẩu nếu có
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+    }
+
+    // Lấy thông tin user đã cập nhật
+    const [updatedUserRows] = await db.execute(
+      'SELECT id, email, name, phone, address, balance, customer_code, role, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+
+    const updatedUser = updatedUserRows[0];
+    updatedUser.customer_code = await ensureCustomerCode(db, updatedUser.id, updatedUser.customer_code);
+
+    res.json({ user: updatedUser, message: 'Cập nhật thông tin thành công' });
+  } catch (error) {
+    console.error('Lỗi cập nhật thông tin user:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 module.exports = router;
 

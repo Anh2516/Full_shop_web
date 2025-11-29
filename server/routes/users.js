@@ -15,9 +15,9 @@ const createValidators = [
 ];
 
 const updateValidators = [
-  body('email').optional().isEmail().withMessage('Email không hợp lệ'),
-  body('password').optional().isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
-  body('name').optional().notEmpty().withMessage('Tên không được để trống'),
+  body('email').optional({ checkFalsy: true }).isEmail().withMessage('Email không hợp lệ'),
+  body('password').optional({ checkFalsy: true }).isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+  body('name').optional({ checkFalsy: true }).notEmpty().withMessage('Tên không được để trống'),
   body('role').optional().isIn(['user', 'admin']).withMessage('Vai trò không hợp lệ'),
   body('balance').optional().isFloat({ min: 0 }).withMessage('Số dư phải lớn hơn hoặc bằng 0')
 ];
@@ -124,21 +124,42 @@ router.put('/:id', verifyToken, requireAdmin, updateValidators, async (req, res)
       return res.status(400).json({ message: 'Không thể tự hạ quyền admin của chính bạn' });
     }
 
-    const updates = [
-      { field: 'email', value: email ?? existing[0].email },
-      { field: 'name', value: name ?? existing[0].name },
-      { field: 'phone', value: phone ?? existing[0].phone },
-      { field: 'address', value: address ?? existing[0].address },
-      { field: 'role', value: role ?? existing[0].role },
-      { field: 'balance', value: balance ?? existing[0].balance }
-    ];
+    // Xây dựng danh sách cập nhật - chỉ cập nhật các trường có trong req.body
+    const updates = [];
+    const updateValues = [];
 
-    const updateValues = updates.map(item => item.value);
-    const setClause = updates.map(item => `${item.field} = ?`).join(', ');
+    if (email !== undefined) {
+      updates.push('email = ?');
+      updateValues.push(email);
+    }
+    if (name !== undefined) {
+      updates.push('name = ?');
+      updateValues.push(name);
+    }
+    if (phone !== undefined) {
+      updates.push('phone = ?');
+      updateValues.push(phone || null);
+    }
+    if (address !== undefined) {
+      updates.push('address = ?');
+      updateValues.push(address || null);
+    }
+    if (role !== undefined) {
+      updates.push('role = ?');
+      updateValues.push(role);
+    }
+    if (balance !== undefined) {
+      updates.push('balance = ?');
+      updateValues.push(balance);
+    }
 
-    await db.execute(`UPDATE users SET ${setClause} WHERE id = ?`, [...updateValues, userId]);
+    if (updates.length > 0) {
+      updateValues.push(userId);
+      await db.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, updateValues);
+    }
 
-    if (password) {
+    // Cập nhật mật khẩu nếu có và không rỗng
+    if (password && password.trim().length > 0) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
     }

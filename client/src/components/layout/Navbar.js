@@ -61,7 +61,9 @@ const Navbar = () => {
               {user?.role !== 'admin' && typeof user?.balance !== 'undefined' && (
                 <span className="navbar-balance">Số dư: {formatCurrency(user.balance)}</span>
               )}
-              <span className="navbar-user">Xin chào, {user?.name}</span>
+              <Link to="/profile" className="navbar-user" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                Xin chào, {user?.name}
+              </Link>
               <button onClick={handleLogout} className="btn btn-primary">Đăng xuất</button>
             </>
           ) : (

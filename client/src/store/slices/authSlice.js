@@ -53,6 +53,25 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+// Cập nhật thông tin user hiện tại
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue('Không có token');
+      }
+      const response = await axios.put(`${API_URL}/me`, userData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.response?.data?.errors?.[0]?.msg || 'Cập nhật thất bại');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -117,6 +136,19 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
+      })
+      // Update profile
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

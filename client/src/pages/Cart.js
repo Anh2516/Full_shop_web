@@ -14,7 +14,7 @@ const Cart = () => {
   const { user } = useSelector(state => state.auth);
   const { loading } = useSelector(state => state.orders);
   const [shippingAddress, setShippingAddress] = useState(user?.address || '');
-  const [paymentGateway, setPaymentGateway] = useState('cod');
+  const paymentGateway = 'wallet'; // Chỉ dùng số dư ví
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
@@ -32,8 +32,8 @@ const Cart = () => {
       })),
       total,
       shipping_address: shippingAddress,
-      payment_method: 'cod',
-      payment_gateway: paymentGateway
+      payment_method: 'wallet',
+      payment_gateway: 'wallet'
     };
 
     try {
@@ -122,16 +122,15 @@ const Cart = () => {
               />
             </div>
             <div className="form-group">
-              <label>Cổng thanh toán</label>
-              <select
-                value={paymentGateway}
-                onChange={(e) => setPaymentGateway(e.target.value)}
-              >
-                <option value="cod">Thanh toán khi nhận hàng</option>
-                <option value="vnpay">VNPay</option>
-                <option value="momo">Momo</option>
-                <option value="paypal">PayPal</option>
-              </select>
+              <label>Phương thức thanh toán</label>
+              <div style={{ 
+                padding: '10px', 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: '4px',
+                border: '1px solid #dee2e6'
+              }}>
+                <strong>Số dư ví ShopWeb</strong>
+              </div>
             </div>
             <div className="summary-row">
               <span>Số dư ví ShopWeb:</span>

@@ -91,19 +91,37 @@ const Users = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // Chuẩn bị dữ liệu để gửi
+      const submitData = { ...formData };
+      
+      // Nếu đang sửa và password rỗng, không gửi password
+      if (editingUser && !submitData.password) {
+        delete submitData.password;
+      }
+      
+      // Đảm bảo balance là số
+      if (submitData.balance !== undefined) {
+        submitData.balance = Number(submitData.balance);
+      }
+      
       if (editingUser) {
-        await axios.put(`/api/users/${editingUser.id}`, formData, {
+        await axios.put(`/api/users/${editingUser.id}`, submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('/api/users', formData, {
+        await axios.post('/api/users', submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
       await fetchUsers(debouncedSearch);
       closeModal();
     } catch (error) {
-      alert(error.response?.data?.message || 'Có lỗi xảy ra');
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.[0]?.msg || 
+                          error.message || 
+                          'Có lỗi xảy ra';
+      alert(errorMessage);
+      console.error('Lỗi cập nhật user:', error.response?.data || error);
     } finally {
       setSubmitting(false);
     }

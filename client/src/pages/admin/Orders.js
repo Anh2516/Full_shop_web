@@ -32,12 +32,22 @@ const Orders = () => {
     }));
   }, [dispatch, debouncedSearch, statusFilter]);
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    await dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
-    dispatch(fetchAllOrders({
-      status: statusFilter || undefined,
-      search: debouncedSearch || undefined
-    }));
+  const handleStatusChange = async (e, orderId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newStatus = e.target.value;
+    
+    try {
+      await dispatch(updateOrderStatus({ id: orderId, status: newStatus })).unwrap();
+      
+      // Cập nhật orderDetail nếu đang mở modal cho order này
+      if (showDetail && orderDetail && orderDetail.id === orderId) {
+        setOrderDetail({ ...orderDetail, status: newStatus });
+      }
+    } catch (error) {
+      alert(error || 'Có lỗi xảy ra khi cập nhật trạng thái');
+      console.error('Lỗi cập nhật trạng thái:', error);
+    }
   };
 
   const filteredOrders = items;
@@ -126,7 +136,7 @@ const Orders = () => {
                     <td>{order.id}</td>
                     <td>{order.user_name} ({order.user_email})</td>
                     <td>{formatCurrency(order.total)}</td>
-                    <td>{order.payment_gateway?.toUpperCase() || 'COD'}</td>
+                    <td>{order.payment_gateway === 'wallet' ? 'Số dư ví' : (order.payment_gateway?.toUpperCase() || 'COD')}</td>
                     <td>
                       <span
                         style={{
@@ -144,7 +154,7 @@ const Orders = () => {
                     <td>
                       <select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(e, order.id)}
                         className="status-select"
                       >
                         <option value="pending">Chờ xử lý</option>
@@ -191,8 +201,8 @@ const Orders = () => {
                 <h3>Thông tin đơn hàng</h3>
                 <div className="order-detail-grid">
                   <div><strong>Trạng thái:</strong> {orderDetail.status}</div>
-                  <div><strong>Phương thức thanh toán:</strong> {orderDetail.payment_method?.toUpperCase()}</div>
-                  <div><strong>Cổng thanh toán:</strong> {orderDetail.payment_gateway?.toUpperCase() || 'COD'}</div>
+                  <div><strong>Phương thức thanh toán:</strong> {orderDetail.payment_method === 'wallet' ? 'Số dư ví' : (orderDetail.payment_method?.toUpperCase() || 'COD')}</div>
+                  <div><strong>Cổng thanh toán:</strong> {orderDetail.payment_gateway === 'wallet' ? 'Số dư ví' : (orderDetail.payment_gateway?.toUpperCase() || 'COD')}</div>
                   <div><strong>Địa chỉ giao hàng:</strong> {orderDetail.shipping_address}</div>
                 </div>
               </div>

@@ -1,6 +1,16 @@
+-- ============================================
+-- SCHEMA DATABASE SHOPWEB - HOÀN CHỈNH
+-- ============================================
+-- File này chứa toàn bộ cấu trúc database và dữ liệu mẫu
+-- Chạy file này để tạo database từ đầu
+
 -- Tạo database
 CREATE DATABASE IF NOT EXISTS shopweb_db;
 USE shopweb_db;
+
+-- ============================================
+-- TẠO CÁC BẢNG
+-- ============================================
 
 -- Bảng users
 CREATE TABLE IF NOT EXISTS users (
@@ -42,13 +52,14 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- Bảng orders
+-- Lưu ý: payment_gateway đã được đổi từ ENUM sang VARCHAR để hỗ trợ 'wallet'
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   total DECIMAL(10, 2) NOT NULL,
   shipping_address TEXT NOT NULL,
-  payment_method VARCHAR(50) DEFAULT 'cod',
-  payment_gateway ENUM('cod', 'vnpay', 'momo', 'paypal') DEFAULT 'cod',
+  payment_method VARCHAR(50) DEFAULT 'wallet',
+  payment_gateway VARCHAR(50) DEFAULT 'wallet',
   status ENUM('pending', 'processing', 'shipped', 'completed', 'cancelled') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -103,10 +114,12 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
   FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- Tạo admin bằng script: node scripts/createAdmin.js
--- Hoặc tạo thủ công và hash password bằng bcrypt
+-- ============================================
+-- DỮ LIỆU MẪU (TÙY CHỌN)
+-- ============================================
+-- Bỏ comment các dòng dưới nếu muốn thêm dữ liệu mẫu
 
--- Thêm một số categories mẫu
+-- Thêm categories mẫu
 INSERT INTO categories (name, description) VALUES
 ('Điện thoại', 'Các loại điện thoại thông minh'),
 ('Laptop', 'Máy tính xách tay'),
@@ -114,3 +127,20 @@ INSERT INTO categories (name, description) VALUES
 ('Đồ gia dụng', 'Đồ dùng trong gia đình')
 ON DUPLICATE KEY UPDATE name=name;
 
+-- ============================================
+-- MIGRATION: Cập nhật payment_gateway cho database cũ
+-- ============================================
+-- Nếu database đã tồn tại và payment_gateway là ENUM, chạy các lệnh sau:
+
+-- ALTER TABLE orders 
+-- MODIFY COLUMN payment_gateway VARCHAR(50) DEFAULT 'wallet';
+-- 
+-- UPDATE orders SET payment_gateway = 'wallet' WHERE payment_gateway = 'cod';
+
+-- ============================================
+-- GHI CHÚ
+-- ============================================
+-- 1. Tạo admin bằng script: node scripts/createAdmin.js
+-- 2. Hoặc tạo thủ công và hash password bằng bcrypt
+-- 3. Để thêm dữ liệu mẫu đầy đủ, chạy file sample-data.sql riêng
+-- 4. payment_gateway đã được đổi từ ENUM sang VARCHAR để hỗ trợ 'wallet'

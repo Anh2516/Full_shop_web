@@ -13,6 +13,17 @@ router.post('/', verifyToken, async (req, res) => {
     return res.status(400).json({ message: 'Giỏ hàng trống' });
   }
 
+  if (!shipping_address || !shipping_address.trim()) {
+    return res.status(400).json({ message: 'Vui lòng nhập địa chỉ giao hàng' });
+  }
+
+  // Validate items
+  for (const item of items) {
+    if (!item.product_id || !item.quantity || item.quantity <= 0 || !item.price || item.price <= 0) {
+      return res.status(400).json({ message: 'Thông tin sản phẩm không hợp lệ' });
+    }
+  }
+
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -34,11 +45,33 @@ router.post('/', verifyToken, async (req, res) => {
 
     const [orderResult] = await connection.execute(
       'INSERT INTO orders (user_id, total, shipping_address, payment_method, payment_gateway, status) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, orderTotal, shipping_address, payment_method || 'cod', payment_gateway || 'cod', 'pending']
+      [userId, orderTotal, shipping_address, payment_method || 'wallet', payment_gateway || 'wallet', 'pending']
     );
 
     const orderId = orderResult.insertId;
 
+    // Kiểm tra số lượng sản phẩm trong kho trước khi tạo đơn hàng
+    for (const item of items) {
+      const [productRows] = await connection.execute(
+        'SELECT id, name, stock FROM products WHERE id = ? FOR UPDATE',
+        [item.product_id]
+      );
+
+      if (productRows.length === 0) {
+        await connection.rollback();
+        return res.status(400).json({ message: `Sản phẩm ID ${item.product_id} không tồn tại` });
+      }
+
+      const product = productRows[0];
+      if (product.stock < item.quantity) {
+        await connection.rollback();
+        return res.status(400).json({ 
+          message: `Sản phẩm "${product.name}" không đủ số lượng. Còn lại: ${product.stock}` 
+        });
+      }
+    }
+
+    // Tạo order_items và trừ số lượng sản phẩm
     for (const item of items) {
       await connection.execute(
         'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
@@ -59,7 +92,7 @@ router.post('/', verifyToken, async (req, res) => {
     await connection.execute(
       `INSERT INTO wallet_transactions (user_id, amount, method, type, note)
        VALUES (?, ?, ?, 'purchase', ?)`,
-      [userId, orderTotal, payment_gateway || payment_method || 'cod', `Thanh toán đơn hàng #${orderId}`]
+      [userId, orderTotal, payment_gateway || payment_method || 'wallet', `Thanh toán đơn hàng #${orderId}`]
     );
 
     await connection.commit();
@@ -86,14 +119,21 @@ router.post('/', verifyToken, async (req, res) => {
     res.status(201).json({ order: order[0], message: 'Tạo đơn hàng thành công' });
   } catch (error) {
     console.error('Lỗi tạo đơn hàng:', error);
-    try {
-      await connection.rollback();
-    } catch (rollbackError) {
-      console.error('Rollback failed:', rollbackError);
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError);
+      }
     }
-    res.status(500).json({ message: 'Lỗi server' });
+    res.status(500).json({ 
+      message: error.message || 'Lỗi server',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
