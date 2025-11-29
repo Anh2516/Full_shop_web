@@ -58,9 +58,42 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="container">
-        <Link to="/" className="navbar-brand">
-          ShopWeb
-        </Link>
+        {/* Hàng 1: Logo và User Info */}
+        <div className="navbar-top">
+          <Link to="/" className="navbar-brand">
+            ShopWeb
+          </Link>
+          <div className="navbar-user-section">
+            {isAuthenticated ? (
+              <>
+                {user?.role !== 'admin' && typeof user?.balance !== 'undefined' && (
+                  <span className="navbar-balance" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <FaWallet /> Số dư: {formatCurrency(user.balance)}
+                  </span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Link to="/profile" className="navbar-user" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <FaUser /> Xin chào, {user?.name}
+                  </Link>
+                  <button onClick={handleLogout} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <FaSignOutAlt /> Đăng xuất
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <FaSignInAlt /> Đăng nhập
+                </Link>
+                <Link to="/register" className="btn btn-success" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <FaUserPlus /> Đăng ký
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Hàng 2: Menu Links */}
         <div className="navbar-menu">
           {navLinks.map(link => {
             const IconComponent = link.icon;
@@ -74,30 +107,6 @@ const Navbar = () => {
               </Link>
             );
           })}
-          {isAuthenticated ? (
-            <>
-              {user?.role !== 'admin' && typeof user?.balance !== 'undefined' && (
-                <span className="navbar-balance" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <FaWallet /> Số dư: {formatCurrency(user.balance)}
-                </span>
-              )}
-              <Link to="/profile" className="navbar-user" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FaUser /> Xin chào, {user?.name}
-              </Link>
-              <button onClick={handleLogout} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FaSignOutAlt /> Đăng xuất
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FaSignInAlt /> Đăng nhập
-              </Link>
-              <Link to="/register" className="btn btn-success" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FaUserPlus /> Đăng ký
-              </Link>
-            </>
-          )}
         </div>
       </div>
     </nav>

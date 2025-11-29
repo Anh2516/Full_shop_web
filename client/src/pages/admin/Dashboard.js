@@ -3,18 +3,6 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
-import { 
   FaUsers, 
   FaBox, 
   FaShoppingCart, 
@@ -24,6 +12,8 @@ import {
   FaCalendarDay,
   FaTrophy
 } from 'react-icons/fa';
+import SimpleLineChart from '../../components/charts/SimpleLineChart';
+import SimpleBarChart from '../../components/charts/SimpleBarChart';
 import BackButton from '../../components/common/BackButton';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
@@ -223,26 +213,15 @@ const Dashboard = () => {
                 <option value="365">1 năm qua</option>
               </select>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value) => formatCurrency(value)}
-                  labelStyle={{ color: '#333' }}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#28a745" 
-                  strokeWidth={2}
-                  name="Doanh thu"
-                  dot={{ fill: '#28a745', r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div style={{ height: '300px' }}>
+              <SimpleLineChart
+                data={revenueData}
+                dataKey="revenue"
+                color="#28a745"
+                label="Doanh thu"
+                formatter={(value) => formatCurrency(value)}
+              />
+            </div>
           </div>
 
           {/* Orders Chart */}
@@ -256,24 +235,15 @@ const Dashboard = () => {
               <FaShoppingCart style={{ color: '#ffc107' }} />
               Số đơn hàng theo thời gian
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value) => `${value} đơn`}
-                  labelStyle={{ color: '#333' }}
-                />
-                <Legend />
-                <Bar 
-                  dataKey="orders" 
-                  fill="#ffc107" 
-                  name="Số đơn hàng"
-                  radius={[8, 8, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ height: '300px' }}>
+              <SimpleBarChart
+                data={revenueData}
+                dataKey="orders"
+                color="#ffc107"
+                label="Số đơn hàng"
+                formatter={(value) => `${Math.round(value)} đơn`}
+              />
+            </div>
           </div>
         </div>
 

@@ -11,9 +11,21 @@
 
 .navbar .container {
   display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.navbar-top {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 30px;
+  width: 100%;
+}
+
+.navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .navbar-brand {
@@ -28,6 +40,9 @@
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .navbar-link {
@@ -62,9 +77,15 @@
 }
 
 @media (max-width: 768px) {
-  .navbar .container {
+  .navbar-top {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+  .navbar-user-section {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
   .navbar-menu {
     justify-content: flex-start;
