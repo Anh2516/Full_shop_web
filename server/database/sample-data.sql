@@ -101,9 +101,9 @@ VALUES
 
 -- Thêm giao dịch ví mẫu
 INSERT INTO wallet_transactions (user_id, amount, method, type, note, status) VALUES
-(2, 5000000, 'momo', 'topup', 'Nạp tiền qua Momo', 'approved'),
-(3, 3000000, 'vnpay', 'topup', 'Nạp tiền khuyến mãi', 'approved'),
-(4, 7000000, 'paypal', 'topup', 'Nạp tiền PayPal', 'approved');
+(2, 5000000, 'transfer', 'topup', 'Nạp tiền chuyển khoản', 'approved'),
+(3, 3000000, 'transfer', 'topup', 'Nạp tiền chuyển khoản', 'approved'),
+(4, 7000000, 'transfer', 'topup', 'Nạp tiền chuyển khoản', 'approved');
 
 -- Hiển thị thống kê
 SELECT 'Dữ liệu mẫu đã được thêm thành công!' AS Message;

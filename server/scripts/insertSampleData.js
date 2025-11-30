@@ -95,16 +95,16 @@ async function insertSampleData() {
     // Thêm orders
     console.log('📋 Đang thêm orders...');
     const orders = [
-      [2, 29990000, '456 Đường XYZ, Quận 2, TP.HCM', 'cod', 'completed'],
-      [2, 6990000, '456 Đường XYZ, Quận 2, TP.HCM', 'cod', 'shipped'],
-      [3, 19990000, '789 Đường DEF, Quận 3, TP.HCM', 'cod', 'processing'],
-      [3, 2990000, '789 Đường DEF, Quận 3, TP.HCM', 'cod', 'pending'],
-      [4, 59990000, '321 Đường GHI, Quận 4, TP.HCM', 'cod', 'completed']
+      [2, 29990000, '456 Đường XYZ, Quận 2, TP.HCM', 'wallet', 'wallet', 'completed'],
+      [2, 6990000, '456 Đường XYZ, Quận 2, TP.HCM', 'wallet', 'wallet', 'shipped'],
+      [3, 19990000, '789 Đường DEF, Quận 3, TP.HCM', 'wallet', 'wallet', 'processing'],
+      [3, 2990000, '789 Đường DEF, Quận 3, TP.HCM', 'wallet', 'wallet', 'pending'],
+      [4, 59990000, '321 Đường GHI, Quận 4, TP.HCM', 'wallet', 'wallet', 'completed']
     ];
-    for (const [userId, total, address, payment, status] of orders) {
+    for (const [userId, total, address, paymentMethod, paymentGateway, status] of orders) {
       await pool.execute(
-        'INSERT INTO orders (user_id, total, shipping_address, payment_method, status) VALUES (?, ?, ?, ?, ?)',
-        [userId, total, address, payment, status]
+        'INSERT INTO orders (user_id, total, shipping_address, payment_method, payment_gateway, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [userId, total, address, paymentMethod, paymentGateway, status]
       );
     }
 

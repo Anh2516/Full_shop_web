@@ -68,7 +68,7 @@ const MyOrders = () => {
                         {order.status}
                       </span>
                     </td>
-                    <td>{order.payment_gateway === 'wallet' || order.payment_method === 'wallet' ? 'Số dư ví' : (order.payment_gateway?.toUpperCase() || order.payment_method?.toUpperCase() || 'COD')}</td>
+                    <td>Số dư ví</td>
                     <td>{new Date(order.created_at).toLocaleString('vi-VN')}</td>
                     <td>
                       <button

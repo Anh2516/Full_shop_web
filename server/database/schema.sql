@@ -135,7 +135,7 @@ ON DUPLICATE KEY UPDATE name=name;
 -- ALTER TABLE orders 
 -- MODIFY COLUMN payment_gateway VARCHAR(50) DEFAULT 'wallet';
 -- 
--- UPDATE orders SET payment_gateway = 'wallet' WHERE payment_gateway = 'cod';
+-- UPDATE orders SET payment_gateway = 'wallet' WHERE payment_gateway != 'wallet';
 
 -- ============================================
 -- GHI CHÚ

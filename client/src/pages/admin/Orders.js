@@ -136,7 +136,7 @@ const Orders = () => {
                     <td>{order.id}</td>
                     <td>{order.user_name} ({order.user_email})</td>
                     <td>{formatCurrency(order.total)}</td>
-                    <td>{order.payment_gateway === 'wallet' ? 'Số dư ví' : (order.payment_gateway?.toUpperCase() || 'COD')}</td>
+                    <td>Số dư ví</td>
                     <td>
                       <span
                         style={{
@@ -201,8 +201,8 @@ const Orders = () => {
                 <h3>Thông tin đơn hàng</h3>
                 <div className="order-detail-grid">
                   <div><strong>Trạng thái:</strong> {orderDetail.status}</div>
-                  <div><strong>Phương thức thanh toán:</strong> {orderDetail.payment_method === 'wallet' ? 'Số dư ví' : (orderDetail.payment_method?.toUpperCase() || 'COD')}</div>
-                  <div><strong>Cổng thanh toán:</strong> {orderDetail.payment_gateway === 'wallet' ? 'Số dư ví' : (orderDetail.payment_gateway?.toUpperCase() || 'COD')}</div>
+                  <div><strong>Phương thức thanh toán:</strong> Số dư ví</div>
+                  <div><strong>Cổng thanh toán:</strong> Số dư ví</div>
                   <div><strong>Địa chỉ giao hàng:</strong> {orderDetail.shipping_address}</div>
                 </div>
               </div>
