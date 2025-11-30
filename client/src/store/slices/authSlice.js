@@ -91,6 +91,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateBalance: (state, action) => {
+      if (state.user) {
+        state.user.balance = parseFloat(action.payload) || 0;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -153,6 +158,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, updateBalance } = authSlice.actions;
 export default authSlice.reducer;
 

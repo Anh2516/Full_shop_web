@@ -89,12 +89,6 @@ router.post('/', verifyToken, async (req, res) => {
       [orderTotal, userId]
     );
 
-    await connection.execute(
-      `INSERT INTO wallet_transactions (user_id, amount, method, type, note)
-       VALUES (?, ?, ?, 'purchase', ?)`,
-      [userId, orderTotal, payment_gateway || payment_method || 'wallet', `Thanh toán đơn hàng #${orderId}`]
-    );
-
     await connection.commit();
 
     const [order] = await connection.execute(
@@ -116,7 +110,17 @@ router.post('/', verifyToken, async (req, res) => {
       [orderId]
     );
 
-    res.status(201).json({ order: order[0], message: 'Tạo đơn hàng thành công' });
+    // Lấy balance mới của user để trả về
+    const [updatedUserRows] = await db.execute(
+      'SELECT balance FROM users WHERE id = ?',
+      [userId]
+    );
+
+    res.status(201).json({ 
+      order: order[0], 
+      message: 'Tạo đơn hàng thành công',
+      newBalance: updatedUserRows[0]?.balance || 0
+    });
   } catch (error) {
     console.error('Lỗi tạo đơn hàng:', error);
     if (connection) {

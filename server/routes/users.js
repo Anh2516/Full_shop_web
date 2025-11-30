@@ -45,10 +45,18 @@ router.get('/', verifyToken, requireAdmin, async (req, res) => {
 
     const [users] = await db.execute(query, params);
     const enriched = await Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        customer_code: await ensureCustomerCode(db, user.id, user.customer_code)
-      }))
+      users.map(async (user) => {
+        // Đếm số lượng pending topup transactions
+        const [pendingCount] = await db.execute(
+          'SELECT COUNT(*) as count FROM wallet_transactions WHERE user_id = ? AND type = ? AND status = ?',
+          [user.id, 'topup', 'pending']
+        );
+        return {
+          ...user,
+          customer_code: await ensureCustomerCode(db, user.id, user.customer_code),
+          pending_topup_count: pendingCount[0]?.count || 0
+        };
+      })
     );
     res.json({ users: enriched });
   } catch (error) {

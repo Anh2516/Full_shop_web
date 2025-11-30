@@ -12,7 +12,10 @@ export const createOrder = createAsyncThunk(
       const response = await axios.post(API_URL, orderData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      return response.data.order;
+      return { 
+        order: response.data.order,
+        newBalance: response.data.newBalance 
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi tạo đơn hàng');
     }
@@ -82,8 +85,9 @@ const orderSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(createOrder.fulfilled, (state) => {
+      .addCase(createOrder.fulfilled, (state, action) => {
         state.loading = false;
+        // newBalance sẽ được xử lý trong authSlice
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;

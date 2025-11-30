@@ -62,13 +62,33 @@ const Wallet = () => {
     if (!pendingTopup) return;
     setSubmitting(true);
     try {
-      await axios.post('/api/wallet/topup', {
+      const response = await axios.post('/api/wallet/topup', {
         amount: pendingTopup.amount,
         method: 'vietqr',
         note: user?.customer_code
       }, authHeader);
-      await dispatch(getCurrentUser());
+      
+      // Trigger event TRƯỚC khi làm bất cứ điều gì khác để cập nhật ngay lập tức
+      // Trigger event để cập nhật pending count trong admin users page
+      window.dispatchEvent(new CustomEvent('newTopupRequest', { 
+        detail: { 
+          userId: user?.id,
+          amount: pendingTopup.amount 
+        },
+        bubbles: true,
+        cancelable: true
+      }));
+      
+      // Trigger refresh cho Navbar admin để cập nhật chấm đỏ ngay lập tức
+      window.dispatchEvent(new CustomEvent('pendingCountsUpdate', { 
+        detail: { immediate: true },
+        bubbles: true,
+        cancelable: true
+      }));
+      
+      // Không cần refresh user vì nạp tiền chưa được duyệt
       await fetchTransactions();
+      
       setAmount('');
       setQrModal(false);
       setPendingTopup(null);

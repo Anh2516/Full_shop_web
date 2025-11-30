@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateBalance } from '../../store/slices/authSlice';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
 import BackButton from '../../components/common/BackButton';
 
 const Users = () => {
+  const dispatch = useDispatch();
   const { token } = useSelector(state => state.auth);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,32 @@ const Users = () => {
     setLoading(true);
     fetchUsers(debouncedSearch);
   }, [token, debouncedSearch]);
+
+  // Lắng nghe event khi có người dùng nạp tiền mới
+  useEffect(() => {
+    const handleNewTopup = (event) => {
+      const { userId } = event.detail || {};
+      if (!userId) return;
+      
+      // Cập nhật pending_topup_count ngay lập tức cho user đó
+      setUsers(prevUsers => {
+        const updated = prevUsers.map(u => {
+          if (u.id === userId) {
+            const newCount = (u.pending_topup_count || 0) + 1;
+            return { ...u, pending_topup_count: newCount };
+          }
+          return u;
+        });
+        return updated;
+      });
+    };
+
+    // Sử dụng capture phase để đảm bảo nhận event sớm nhất
+    window.addEventListener('newTopupRequest', handleNewTopup, true);
+    return () => {
+      window.removeEventListener('newTopupRequest', handleNewTopup, true);
+    };
+  }, []);
 
   const openModal = (user = null) => {
     if (user) {
@@ -165,10 +193,35 @@ const Users = () => {
 
   const handleApproveTopup = async (transactionId) => {
     try {
-      await axios.post(`/api/wallet/admin/${transactionId}/approve`, {}, {
+      const response = await axios.post(`/api/wallet/admin/${transactionId}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setWalletTransactions(prev => prev.filter(txn => txn.id !== transactionId));
+      
+      // Cập nhật balance cho user nếu họ đang đăng nhập (broadcast event)
+      if (response.data.user) {
+        window.dispatchEvent(new CustomEvent('balanceUpdated', { 
+          detail: { 
+            userId: response.data.user.id,
+            newBalance: response.data.user.balance 
+          } 
+        }));
+      }
+      
+      // Cập nhật chấm đỏ ngay lập tức bằng cách giảm count
+      setWalletTransactions(prev => {
+        const filtered = prev.filter(txn => txn.id !== transactionId);
+        // Cập nhật pending_topup_count trong users list ngay lập tức
+        setUsers(prevUsers => prevUsers.map(u => {
+          if (u.id === walletModalUser?.id) {
+            return { ...u, pending_topup_count: Math.max(0, (u.pending_topup_count || 0) - 1) };
+          }
+          return u;
+        }));
+        return filtered;
+      });
+      
+      // Trigger refresh cho Navbar ngay lập tức
+      window.dispatchEvent(new CustomEvent('pendingCountsUpdate', { detail: { immediate: true } }));
       await fetchUsers(debouncedSearch);
       alert('Đã duyệt nạp tiền');
     } catch (error) {
@@ -178,11 +231,27 @@ const Users = () => {
 
   const handleRejectTopup = async (transactionId) => {
     const reason = window.prompt('Lý do từ chối (có thể bỏ trống)', '');
+    if (reason === null) return; // User cancelled
     try {
       await axios.post(`/api/wallet/admin/${transactionId}/reject`, { reason }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setWalletTransactions(prev => prev.filter(txn => txn.id !== transactionId));
+      
+      // Cập nhật chấm đỏ ngay lập tức bằng cách giảm count
+      setWalletTransactions(prev => {
+        const filtered = prev.filter(txn => txn.id !== transactionId);
+        // Cập nhật pending_topup_count trong users list ngay lập tức
+        setUsers(prevUsers => prevUsers.map(u => {
+          if (u.id === walletModalUser?.id) {
+            return { ...u, pending_topup_count: Math.max(0, (u.pending_topup_count || 0) - 1) };
+          }
+          return u;
+        }));
+        return filtered;
+      });
+      
+      // Trigger refresh cho Navbar ngay lập tức
+      window.dispatchEvent(new CustomEvent('pendingCountsUpdate', { detail: { immediate: true } }));
       alert('Đã từ chối giao dịch');
     } catch (error) {
       alert(error.response?.data?.message || 'Không thể từ chối giao dịch');
@@ -248,8 +317,31 @@ const Users = () => {
                       <button className="btn btn-danger" onClick={() => handleDelete(user.id)}>
                         Xóa
                       </button>
-                      <button className="btn btn-secondary" onClick={() => openWalletModal(user)}>
+                      <button 
+                        className="btn btn-secondary" 
+                        onClick={() => openWalletModal(user)}
+                        style={{ position: 'relative' }}
+                      >
                         Duyệt nạp
+                        {user.pending_topup_count > 0 && (
+                          <span style={{
+                            position: 'absolute',
+                            top: '-5px',
+                            right: '-5px',
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            {user.pending_topup_count}
+                          </span>
+                        )}
                       </button>
                     </td>
                   </tr>

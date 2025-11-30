@@ -53,10 +53,11 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Bảng orders
 -- Lưu ý: payment_gateway đã được đổi từ ENUM sang VARCHAR để hỗ trợ 'wallet'
+-- Lưu ý: total đã được đổi từ DECIMAL(10,2) sang DECIMAL(12,2) để hỗ trợ giá trị lớn hơn
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  total DECIMAL(10, 2) NOT NULL,
+  total DECIMAL(12, 2) NOT NULL,
   shipping_address TEXT NOT NULL,
   payment_method VARCHAR(50) DEFAULT 'wallet',
   payment_gateway VARCHAR(50) DEFAULT 'wallet',
@@ -128,14 +129,17 @@ INSERT INTO categories (name, description) VALUES
 ON DUPLICATE KEY UPDATE name=name;
 
 -- ============================================
--- MIGRATION: Cập nhật payment_gateway cho database cũ
+-- MIGRATION: Cập nhật payment_gateway và total cho database cũ
 -- ============================================
--- Nếu database đã tồn tại và payment_gateway là ENUM, chạy các lệnh sau:
+-- Nếu database đã tồn tại, chạy các lệnh sau:
 
 -- ALTER TABLE orders 
 -- MODIFY COLUMN payment_gateway VARCHAR(50) DEFAULT 'wallet';
 -- 
 -- UPDATE orders SET payment_gateway = 'wallet' WHERE payment_gateway != 'wallet';
+--
+-- ALTER TABLE orders
+-- MODIFY COLUMN total DECIMAL(12, 2) NOT NULL;
 
 -- ============================================
 -- GHI CHÚ

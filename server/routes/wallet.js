@@ -75,7 +75,7 @@ router.get('/admin/pending', requireAdmin, async (req, res) => {
     let query = `SELECT wt.*, u.name as user_name, u.email as user_email
       FROM wallet_transactions wt
       JOIN users u ON wt.user_id = u.id
-      WHERE wt.status = 'pending'`;
+      WHERE wt.status = 'pending' AND wt.type = 'topup'`;
     const params = [];
 
     if (userId) {
@@ -115,6 +115,30 @@ router.post('/admin/:id/approve', requireAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Giao dịch đã được xử lý' });
     }
 
+    // Kiểm tra balance hiện tại trước khi cộng
+    const [userRows] = await connection.execute(
+      'SELECT balance FROM users WHERE id = ? FOR UPDATE',
+      [transaction.user_id]
+    );
+
+    if (userRows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    const currentBalance = parseFloat(userRows[0].balance) || 0;
+    const topupAmount = parseFloat(transaction.amount) || 0;
+    const newBalance = currentBalance + topupAmount;
+
+    // Kiểm tra nếu vượt quá giới hạn DECIMAL(12,2) = 9,999,999,999.99
+    const maxBalance = 9999999999.99;
+    if (newBalance > maxBalance) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        message: `Số dư sau khi nạp (${newBalance.toLocaleString('vi-VN')} ₫) vượt quá giới hạn cho phép (${maxBalance.toLocaleString('vi-VN')} ₫)` 
+      });
+    }
+
     await connection.execute(
       'UPDATE wallet_transactions SET status = "approved", approved_by = ?, approved_at = NOW() WHERE id = ?',
       [req.user.userId, transactionId]
@@ -127,7 +151,7 @@ router.post('/admin/:id/approve', requireAdmin, async (req, res) => {
 
     await connection.commit();
 
-    const [userRows] = await db.execute(
+    const [updatedUserRows] = await db.execute(
       'SELECT id, email, name, phone, address, balance, customer_code, role, created_at FROM users WHERE id = ?',
       [transaction.user_id]
     );
@@ -140,18 +164,24 @@ router.post('/admin/:id/approve', requireAdmin, async (req, res) => {
         approved_by: req.user.userId,
         approved_at: new Date()
       },
-      user: userRows[0]
+      user: updatedUserRows[0]
     });
   } catch (error) {
     console.error('Lỗi duyệt giao dịch:', error);
+    console.error('Error details:', error.message, error.stack);
     try {
       await connection.rollback();
     } catch (rollbackError) {
       console.error('Rollback failed:', rollbackError);
     }
-    res.status(500).json({ message: 'Lỗi server' });
+    res.status(500).json({ 
+      message: error.message || 'Lỗi server',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCurrentUser } from './store/slices/authSlice';
+import { getCurrentUser, updateBalance } from './store/slices/authSlice';
 import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -23,13 +23,29 @@ import './App.css';
 
 function App() {
   const dispatch = useDispatch();
-  const { token, isAuthenticated } = useSelector(state => state.auth);
+  const { token, isAuthenticated, user } = useSelector(state => state.auth);
 
   useEffect(() => {
     if (token) {
       dispatch(getCurrentUser());
     }
   }, [dispatch, token]);
+
+  // Lắng nghe event để cập nhật balance khi admin duyệt nạp tiền
+  useEffect(() => {
+    const handleBalanceUpdate = (event) => {
+      const { userId, newBalance } = event.detail;
+      // Chỉ cập nhật nếu user đang đăng nhập là user được duyệt
+      if (user && user.id === userId) {
+        dispatch(updateBalance(newBalance));
+      }
+    };
+
+    window.addEventListener('balanceUpdated', handleBalanceUpdate);
+    return () => {
+      window.removeEventListener('balanceUpdated', handleBalanceUpdate);
+    };
+  }, [dispatch, user]);
 
   return (
     <div className="App">

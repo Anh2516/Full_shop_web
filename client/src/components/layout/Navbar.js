@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
+import axios from 'axios';
 import Icon from '../common/Icon';
 import './Navbar.css';
 import { formatCurrency } from '../../utils/currency';
@@ -9,8 +10,10 @@ import { formatCurrency } from '../../utils/currency';
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const { isAuthenticated, user, token } = useSelector(state => state.auth);
   const cartItems = useSelector(state => state.cart.items);
+  const [pendingTopupCount, setPendingTopupCount] = useState(0);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -18,6 +21,43 @@ const Navbar = () => {
   };
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Fetch pending counts for admin
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin' && token) {
+      const fetchPendingCounts = async () => {
+        try {
+          const response = await axios.get('/api/admin/stats', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setPendingTopupCount(response.data.stats.pendingTopupCount || 0);
+          setPendingOrdersCount(response.data.stats.pendingOrdersCount || 0);
+        } catch (error) {
+          console.error('Lỗi lấy số lượng pending:', error);
+        }
+      };
+
+      fetchPendingCounts();
+      // Polling mỗi 5 giây để cập nhật real-time
+      const interval = setInterval(fetchPendingCounts, 5000);
+      
+      // Lắng nghe event để refresh ngay lập tức
+      const handleUpdate = (e) => {
+        // Nếu có immediate flag, refresh ngay không delay
+        if (e.detail?.immediate) {
+          fetchPendingCounts();
+        } else {
+          fetchPendingCounts();
+        }
+      };
+      window.addEventListener('pendingCountsUpdate', handleUpdate);
+      
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('pendingCountsUpdate', handleUpdate);
+      };
+    }
+  }, [isAuthenticated, user?.role, token]);
 
   const baseLinks = [{ to: '/products', label: 'Sản phẩm', icon: 'shoppingBag' }];
   let navLinks = baseLinks;
@@ -83,11 +123,56 @@ const Navbar = () => {
         {/* Hàng 2: Menu Links */}
         <div className="navbar-menu">
           {navLinks.map(link => (
-            <Link key={link.to} to={link.to} className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Link 
+              key={link.to} 
+              to={link.to} 
+              className="navbar-link" 
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}
+            >
               <Icon name={link.icon} size={16} />
               {link.label}
               {link.to === '/cart' && cartItemCount > 0 && (
                 <span className="cart-badge">{cartItemCount}</span>
+              )}
+              {link.to === '/admin/users' && pendingTopupCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  minWidth: '20px'
+                }}>
+                  {pendingTopupCount > 99 ? '99+' : pendingTopupCount}
+                </span>
+              )}
+              {link.to === '/admin/orders' && pendingOrdersCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  minWidth: '20px'
+                }}>
+                  {pendingOrdersCount > 99 ? '99+' : pendingOrdersCount}
+                </span>
               )}
             </Link>
           ))}

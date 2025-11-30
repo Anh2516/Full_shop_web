@@ -32,6 +32,15 @@ router.get('/stats', async (req, res) => {
 
     const revenue = totalRevenue[0].revenue || 0;
     const cost = importCost[0].total || 0;
+    const [pendingTopupCount] = await db.execute(
+      'SELECT COUNT(*) as count FROM wallet_transactions WHERE type = ? AND status = ?',
+      ['topup', 'pending']
+    );
+    const [pendingOrdersCount] = await db.execute(
+      'SELECT COUNT(*) as count FROM orders WHERE status = ?',
+      ['pending']
+    );
+    
     res.json({
       stats: {
         totalUsers: totalUsers[0].count,
@@ -40,7 +49,9 @@ router.get('/stats', async (req, res) => {
         totalRevenue: revenue,
         profit: revenue - cost,
         recentOrders: recentOrders[0].count,
-        totalBalance: totalBalance[0].balance || 0
+        totalBalance: totalBalance[0].balance || 0,
+        pendingTopupCount: pendingTopupCount[0].count || 0,
+        pendingOrdersCount: pendingOrdersCount[0].count || 0
       },
       bestSellers
     });

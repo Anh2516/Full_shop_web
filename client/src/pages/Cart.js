@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { removeFromCart, updateQuantity, clearCart } from '../store/slices/cartSlice';
 import { createOrder } from '../store/slices/orderSlice';
+import { updateBalance } from '../store/slices/authSlice';
 import './Cart.css';
 import { formatCurrency } from '../utils/currency';
 import BackButton from '../components/common/BackButton';
@@ -37,8 +38,14 @@ const Cart = () => {
     };
 
     try {
-      await dispatch(createOrder(orderData)).unwrap();
+      const result = await dispatch(createOrder(orderData)).unwrap();
+      // Cập nhật balance ngay lập tức
+      if (result.newBalance !== undefined) {
+        dispatch(updateBalance(result.newBalance));
+      }
       dispatch(clearCart());
+      // Trigger refresh cho Navbar admin để cập nhật chấm đỏ
+      window.dispatchEvent(new Event('pendingCountsUpdate'));
       alert('Đặt hàng thành công!');
       navigate('/');
     } catch (error) {

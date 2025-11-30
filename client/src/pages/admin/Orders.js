@@ -44,6 +44,8 @@ const Orders = () => {
       if (showDetail && orderDetail && orderDetail.id === orderId) {
         setOrderDetail({ ...orderDetail, status: newStatus });
       }
+      // Trigger refresh cho Navbar để cập nhật chấm đỏ
+      window.dispatchEvent(new Event('pendingCountsUpdate'));
     } catch (error) {
       alert(error || 'Có lỗi xảy ra khi cập nhật trạng thái');
       console.error('Lỗi cập nhật trạng thái:', error);
