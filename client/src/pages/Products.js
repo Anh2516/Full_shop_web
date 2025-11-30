@@ -5,6 +5,7 @@ import { fetchProducts } from '../store/slices/productSlice';
 import BackButton from '../components/common/BackButton';
 import './Products.css';
 import { formatCurrency } from '../utils/currency';
+import axios from 'axios';
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -12,13 +13,28 @@ const Products = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchProducts({ search, page, limit: 12 }));
-    if (page === 1 && !search) {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchProducts({ search, page, limit: 12, category: selectedCategory || undefined }));
+    if (page === 1 && !search && !selectedCategory) {
       fetchBestSellers();
     }
-  }, [dispatch, search, page]);
+  }, [dispatch, search, page, selectedCategory]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('/api/products/categories/list');
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      console.error('Lỗi lấy categories:', error);
+    }
+  };
 
   const fetchBestSellers = async () => {
     try {
@@ -38,16 +54,33 @@ const Products = () => {
         <h1 className="page-title">Danh sách sản phẩm</h1>
         
         <div className="products-filters">
-          <input
-            type="text"
-            placeholder="Tìm kiếm sản phẩm..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="search-input"
-          />
+          <div className="filters-row">
+            <input
+              type="text"
+              placeholder="Tìm kiếm sản phẩm..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="search-input"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setPage(1);
+              }}
+              className="category-select"
+            >
+              <option value="">Tất cả danh mục</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {loading ? (

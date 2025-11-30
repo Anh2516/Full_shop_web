@@ -229,5 +229,16 @@ router.put('/:id/visibility', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
+// Lấy danh sách categories (public)
+router.get('/categories/list', async (req, res) => {
+  try {
+    const [categories] = await db.execute('SELECT * FROM categories ORDER BY name');
+    res.json({ categories });
+  } catch (error) {
+    console.error('Lỗi lấy categories:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 module.exports = router;
 
