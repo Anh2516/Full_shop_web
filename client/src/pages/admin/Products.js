@@ -66,15 +66,36 @@ const Products = () => {
     };
 
     if (editingProduct) {
-      await dispatch(updateProduct({ id: editingProduct.id, productData: payload }));
-      await dispatch(fetchProducts({ admin: true, limit: 1000, search: debouncedSearch || undefined }));
-      // Refresh images after update
-      await fetchProductImages(editingProduct.id);
+      const result = await dispatch(updateProduct({ id: editingProduct.id, productData: payload }));
+      
+      // Kiểm tra nếu cập nhật thành công
+      if (result.type === 'products/updateProduct/fulfilled') {
+        // Refresh danh sách sản phẩm
+        await dispatch(fetchProducts({ admin: true, limit: 1000, search: debouncedSearch || undefined }));
+        
+        // Đóng modal và reset form
+        setShowModal(false);
+        setEditingProduct(null);
+        setProductImages([]);
+        setNewImageUrl('');
+        setFormData({
+          name: '',
+          description: '',
+          price: '',
+          stock: '',
+          category_id: '',
+          image: '',
+          is_visible: true
+        });
+      } else {
+        // Nếu có lỗi, hiển thị thông báo
+        alert(result.payload || 'Có lỗi xảy ra khi cập nhật sản phẩm');
+      }
     } else {
       const result = await dispatch(createProduct(payload));
       await dispatch(fetchProducts({ admin: true, limit: 1000, search: debouncedSearch || undefined }));
       // Nếu tạo mới thành công, set editingProduct để có thể thêm ảnh
-      if (result.payload && result.payload.id) {
+      if (result.type === 'products/createProduct/fulfilled' && result.payload && result.payload.id) {
         setEditingProduct(result.payload);
         setProductImages([]);
       } else {
@@ -92,6 +113,9 @@ const Products = () => {
           image: '',
           is_visible: true
         });
+        if (result.type === 'products/createProduct/rejected') {
+          alert(result.payload || 'Có lỗi xảy ra khi tạo sản phẩm');
+        }
       }
     }
   };

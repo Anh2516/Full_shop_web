@@ -25,11 +25,20 @@ function App() {
   const dispatch = useDispatch();
   const { token, isAuthenticated, user } = useSelector(state => state.auth);
 
+  // Gọi getCurrentUser ngay khi app mount nếu có token trong localStorage
   useEffect(() => {
-    if (token) {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken && !isAuthenticated) {
       dispatch(getCurrentUser());
     }
-  }, [dispatch, token]);
+  }, [dispatch]); // Chỉ chạy một lần khi mount
+
+  // Cũng gọi khi token thay đổi (trường hợp login)
+  useEffect(() => {
+    if (token && !isAuthenticated) {
+      dispatch(getCurrentUser());
+    }
+  }, [dispatch, token, isAuthenticated]);
 
   // Lắng nghe event để cập nhật balance khi admin duyệt nạp tiền
   useEffect(() => {
