@@ -32,9 +32,18 @@ export const fetchProductById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_URL}/${id}`);
+      
+      // Kiểm tra response có đúng format không
+      if (!response.data || !response.data.product) {
+        console.error('Response không đúng format:', response.data);
+        return rejectWithValue('Dữ liệu sản phẩm không hợp lệ');
+      }
+      
       return response.data.product;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi tải sản phẩm');
+      console.error('Lỗi fetchProductById:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Lỗi tải sản phẩm';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -142,14 +151,17 @@ const productSlice = createSlice({
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.currentProduct = null; // Clear product khi fetch mới
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.loading = false;
+        state.error = null;
         state.currentProduct = action.payload;
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Không tìm thấy sản phẩm';
+        state.currentProduct = null; // Clear product khi lỗi
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.items.unshift(action.payload);

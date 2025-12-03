@@ -4,7 +4,7 @@ const { generateUniqueCustomerCode } = require('../utils/customerCode');
 require('dotenv').config();
 
 async function createAdmin() {
-  try {
+  try { 
     const email = 'manager@shop.com';
     const password = 'manager123';
     const name = 'Manager';

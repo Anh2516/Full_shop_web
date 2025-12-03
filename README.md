@@ -55,7 +55,24 @@ cd ../client && npm install
 mysql -u root -p < server/database/schema.sql
 ```
 
-3. Tạo file `.env` trong thư mục `server`:
+3. **Setup tự động (Khuyến nghị):**
+```bash
+# Từ thư mục root, chạy script setup tự động
+npm run setup
+```
+
+Script này sẽ tự động:
+- ✅ Kiểm tra kết nối database
+- ✅ Kiểm tra các bảng đã tồn tại
+- ✅ Tạo tài khoản admin (Email: `manager@shop.com`, Password: `manager123`)
+
+**Hoặc setup thủ công:**
+```bash
+cd server
+npm run create-admin # Tạo admin
+```
+
+4. Tạo file `.env` trong thư mục `server`:
 ```env
 PORT=5000
 DB_HOST=localhost
@@ -64,7 +81,50 @@ DB_PASSWORD=your_password
 DB_NAME=shopweb_db
 JWT_SECRET=your_secret_key_here_change_in_production
 JWT_EXPIRE=7d
+
+# Chọn provider upload ảnh (imgbb, imgur, cloudinary, imagekit)
+IMAGE_UPLOAD_PROVIDER=imgbb
+
+# Cấu hình ImgBB (miễn phí, dễ dùng)
+IMGBB_API_KEY=your_imgbb_api_key_here
+
+# Cấu hình Imgur (miễn phí, không cần API key cho public)
+IMGUR_CLIENT_ID=your_imgur_client_id_here
+
+# Cấu hình Cloudinary (free tier: 25GB storage, 25GB bandwidth/tháng)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_UPLOAD_PRESET=ml_default
+
+# Cấu hình ImageKit (free tier: 20GB storage)
+IMAGEKIT_PUBLIC_KEY=your_public_key
+IMAGEKIT_PRIVATE_KEY=your_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
 ```
+
+**Cách lấy API Key cho từng provider:**
+
+**1. ImgBB (Khuyến nghị - đơn giản nhất):**
+- Truy cập [https://api.imgbb.com/](https://api.imgbb.com/)
+- Đăng ký/đăng nhập → Vào phần "API" → Copy API key
+- Giới hạn: 32MB/file, không giới hạn số lượng
+
+**2. Imgur:**
+- Truy cập [https://api.imgur.com/oauth2/addclient](https://api.imgur.com/oauth2/addclient)
+- Tạo ứng dụng → Copy Client ID
+- Giới hạn: 10MB/file, không giới hạn số lượng
+
+**3. Cloudinary (Tốt nhất cho production):**
+- Truy cập [https://cloudinary.com/](https://cloudinary.com/)
+- Đăng ký miễn phí → Dashboard → Copy Cloud Name, API Key, API Secret
+- Tạo Upload Preset (Settings → Upload → Upload presets)
+- Free tier: 25GB storage, 25GB bandwidth/tháng
+
+**4. ImageKit:**
+- Truy cập [https://imagekit.io/](https://imagekit.io/)
+- Đăng ký miễn phí → Dashboard → Copy Public Key, Private Key, URL Endpoint
+- Free tier: 20GB storage, 20GB bandwidth/tháng
 
 ### 3. Chạy ứng dụng
 
@@ -119,6 +179,30 @@ node scripts/insertSampleData.js
 - User: user3@example.com / password123
 
 **Lưu ý:** Đổi mật khẩu sau khi đăng nhập lần đầu!
+
+## Setup tự động
+
+Khi clone project từ GitHub, bạn có thể sử dụng script setup tự động:
+
+```bash
+# Từ thư mục root
+npm run setup
+```
+
+Script này sẽ tự động:
+- ✅ Kiểm tra kết nối database
+- ✅ Kiểm tra các bảng đã tồn tại
+- ✅ Tạo tài khoản admin
+
+**Hoặc setup thủ công:**
+```bash
+# Tạo database
+mysql -u root -p < server/database/schema.sql
+
+# Tạo tài khoản admin
+cd server
+npm run create-admin
+```
 
 ## Cấu trúc dự án
 

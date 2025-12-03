@@ -127,22 +127,95 @@ router.get('/best-sellers', async (req, res) => {
   }
 });
 
-// Lấy sản phẩm theo ID
+// Lấy danh sách categories (public) - PHẢI ĐẶT TRƯỚC route /:id để tránh conflict
+router.get('/categories/list', async (req, res) => {
+  try {
+    const [categories] = await db.execute('SELECT * FROM categories ORDER BY name');
+    res.json({ categories });
+  } catch (error) {
+    console.error('Lỗi lấy categories:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// Lấy sản phẩm theo ID (phải đặt sau các route cụ thể như /categories/list, /best-sellers)
 router.get('/:id', async (req, res) => {
   try {
-    const [products] = await db.execute(
-      'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?',
-      [req.params.id]
-    );
-
-    if (products.length === 0) {
+    const productId = parseInt(req.params.id, 10);
+    
+    // Kiểm tra nếu không phải số thì có thể là route khác (như /categories/list)
+    if (isNaN(productId)) {
       return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
     }
 
-    res.json({ product: products[0] });
+    // Kiểm tra xem có phải admin không (từ token nếu có)
+    let includeHidden = false;
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.replace('Bearer ', '');
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.role === 'admin') {
+          includeHidden = true;
+        }
+      }
+    } catch (e) {
+      // Không phải admin hoặc token không hợp lệ, bỏ qua - user thường chỉ xem visible
+    }
+
+    // Lấy sản phẩm - chỉ hiển thị sản phẩm visible cho user thường, admin xem tất cả
+    let query = 'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?';
+    const params = [productId];
+    
+    if (!includeHidden) {
+      query += ' AND p.is_visible = 1';
+    }
+
+    const [products] = await db.execute(query, params);
+
+    if (products.length === 0) {
+      // Kiểm tra xem sản phẩm có tồn tại nhưng bị ẩn không
+      const [checkHidden] = await db.execute(
+        'SELECT id FROM products WHERE id = ? AND is_visible = 0',
+        [productId]
+      );
+      if (checkHidden.length > 0) {
+        return res.status(404).json({ message: 'Sản phẩm này đang bị ẩn' });
+      }
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+    }
+
+    const product = products[0];
+
+    // Lấy danh sách ảnh của sản phẩm (nếu bảng tồn tại)
+    product.images = [];
+    try {
+      const [images] = await db.execute(
+        'SELECT id, image_url, display_order FROM product_images WHERE product_id = ? ORDER BY display_order ASC, id ASC',
+        [productId]
+      );
+
+      if (images && Array.isArray(images)) {
+        product.images = images.map(img => ({
+          id: img.id,
+          url: img.image_url,
+          display_order: img.display_order
+        }));
+      }
+    } catch (imageError) {
+      // Nếu bảng product_images chưa tồn tại hoặc có lỗi, bỏ qua và tiếp tục
+      console.warn('Không thể lấy ảnh sản phẩm (có thể bảng product_images chưa được tạo):', imageError.message);
+      product.images = [];
+    }
+
+    res.json({ product });
   } catch (error) {
     console.error('Lỗi lấy sản phẩm:', error);
-    res.status(500).json({ message: 'Lỗi server' });
+    res.status(500).json({ 
+      message: error.message || 'Lỗi server',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -229,13 +302,105 @@ router.put('/:id/visibility', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Lấy danh sách categories (public)
-router.get('/categories/list', async (req, res) => {
+// ============================================
+// PRODUCT IMAGES API (Admin only)
+// ============================================
+
+// Thêm ảnh cho sản phẩm
+router.post('/:id/images', verifyToken, requireAdmin, async (req, res) => {
   try {
-    const [categories] = await db.execute('SELECT * FROM categories ORDER BY name');
-    res.json({ categories });
+    const { image_url, display_order } = req.body;
+    const productId = req.params.id;
+
+    if (!image_url) {
+      return res.status(400).json({ message: 'Vui lòng cung cấp URL ảnh' });
+    }
+
+    // Kiểm tra sản phẩm có tồn tại không
+    const [products] = await db.execute('SELECT id FROM products WHERE id = ?', [productId]);
+    if (products.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+    }
+
+    const order = display_order !== undefined ? parseInt(display_order, 10) : 0;
+
+    const [result] = await db.execute(
+      'INSERT INTO product_images (product_id, image_url, display_order) VALUES (?, ?, ?)',
+      [productId, image_url, order]
+    );
+
+    const [newImage] = await db.execute(
+      'SELECT id, image_url, display_order FROM product_images WHERE id = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json({ image: newImage[0], message: 'Thêm ảnh thành công' });
   } catch (error) {
-    console.error('Lỗi lấy categories:', error);
+    console.error('Lỗi thêm ảnh:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// Xóa ảnh của sản phẩm
+router.delete('/:id/images/:imageId', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const { id: productId, imageId } = req.params;
+
+    // Kiểm tra ảnh thuộc về sản phẩm này
+    const [images] = await db.execute(
+      'SELECT id FROM product_images WHERE id = ? AND product_id = ?',
+      [imageId, productId]
+    );
+
+    if (images.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy ảnh' });
+    }
+
+    await db.execute('DELETE FROM product_images WHERE id = ?', [imageId]);
+    res.json({ message: 'Xóa ảnh thành công' });
+  } catch (error) {
+    console.error('Lỗi xóa ảnh:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// Cập nhật thứ tự hiển thị ảnh
+router.put('/:id/images/:imageId/order', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const { id: productId, imageId } = req.params;
+    const { display_order } = req.body;
+
+    if (display_order === undefined) {
+      return res.status(400).json({ message: 'Vui lòng cung cấp display_order' });
+    }
+
+    await db.execute(
+      'UPDATE product_images SET display_order = ? WHERE id = ? AND product_id = ?',
+      [parseInt(display_order, 10), imageId, productId]
+    );
+
+    res.json({ message: 'Cập nhật thứ tự thành công' });
+  } catch (error) {
+    console.error('Lỗi cập nhật thứ tự ảnh:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// Lấy tất cả ảnh của sản phẩm
+router.get('/:id/images', async (req, res) => {
+  try {
+    const [images] = await db.execute(
+      'SELECT id, image_url, display_order FROM product_images WHERE product_id = ? ORDER BY display_order ASC, id ASC',
+      [req.params.id]
+    );
+
+    res.json({ images: images.map(img => ({
+      id: img.id,
+      url: img.image_url,
+      display_order: img.display_order
+    })) });
+  } catch (error) {
+    console.error('Lỗi lấy danh sách ảnh:', error);
     res.status(500).json({ message: 'Lỗi server' });
   }
 });
