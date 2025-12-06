@@ -160,7 +160,7 @@
   animation: fadeIn var(--transition-base);
   overflow-y: auto;
   padding: var(--spacing-8) var(--spacing-4);
-  padding-top: 240px; /* Tăng khoảng cách với navbar, không để sát */
+  padding-top: 200px; /* Khoảng cách gần với navbar */
 }
 
 @keyframes fadeIn {
@@ -178,7 +178,7 @@
   border-radius: var(--radius-xl);
   width: 90%;
   max-width: 600px;
-  max-height: calc(90vh - 240px); /* Trừ đi padding-top để không bị tràn */
+  max-height: calc(90vh - 100px); /* Trừ đi padding-top để không bị tràn */
   overflow-y: auto;
   box-shadow: var(--shadow-2xl);
   animation: slideUp var(--transition-slow);
@@ -214,7 +214,9 @@
 }
 
 .modal-content.modal-large {
-  max-width: 900px;
+  max-width: 1800px;
+  width: 98%;
+  max-height: calc(90vh - 100px); /* Đảm bảo cùng max-height với modal thường */
 }
 
 .modal-header {

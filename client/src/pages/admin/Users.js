@@ -353,7 +353,7 @@ const Users = () => {
 
         {showModal && (
           <div className="modal-overlay" onClick={closeModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
               <h2>{editingUser ? 'Cập nhật người dùng' : 'Thêm người dùng'}</h2>
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
