@@ -93,26 +93,26 @@ const Products = () => {
       }
     } else {
       const result = await dispatch(createProduct(payload));
-      await dispatch(fetchProducts({ admin: true, limit: 1000, search: debouncedSearch || undefined }));
+    await dispatch(fetchProducts({ admin: true, limit: 1000, search: debouncedSearch || undefined }));
       // Nếu tạo mới thành công, set editingProduct để có thể thêm ảnh
       if (result.type === 'products/createProduct/fulfilled' && result.payload && result.payload.id) {
         setEditingProduct(result.payload);
         setProductImages([]);
       } else {
         // Nếu không thành công, đóng modal
-        setShowModal(false);
-        setEditingProduct(null);
+    setShowModal(false);
+    setEditingProduct(null);
         setProductImages([]);
         setNewImageUrl('');
-        setFormData({
-          name: '',
-          description: '',
-          price: '',
-          stock: '',
-          category_id: '',
-          image: '',
-          is_visible: true
-        });
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      stock: '',
+      category_id: '',
+      image: '',
+      is_visible: true
+    });
         if (result.type === 'products/createProduct/rejected') {
           alert(result.payload || 'Có lỗi xảy ra khi tạo sản phẩm');
         }
@@ -349,10 +349,10 @@ const Products = () => {
                 <div className="form-group">
                   <label>URL ảnh đại diện (thumbnail)</label>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                    <input
-                      type="text"
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  <input
+                    type="text"
+                    value={formData.image}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="URL ảnh hiển thị ở danh sách sản phẩm"
                       style={{ flex: 1 }}
                     />

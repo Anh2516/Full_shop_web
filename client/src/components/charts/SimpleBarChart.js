@@ -9,7 +9,7 @@ const SimpleBarChart = ({ data, dataKey, color = '#ffc107', label, formatter }) 
   const maxValue = Math.max(...data.map(item => item[dataKey] || 0));
   const chartHeight = 250;
   const barWidth = 100 / data.length;
-  const barSpacing = 2;
+  const barSpacing = 4;
 
   return (
     <div className="simple-chart-container">
@@ -42,9 +42,13 @@ const SimpleBarChart = ({ data, dataKey, color = '#ffc107', label, formatter }) 
                   className="bar-chart-bar"
                   style={{
                     height: `${barHeight}px`,
-                    backgroundColor: color,
-                    borderRadius: '4px 4px 0 0'
+                    background: `linear-gradient(180deg, ${color} 0%, ${color}dd 50%, ${color}aa 100%)`,
+                    borderRadius: '8px 8px 0 0',
+                    border: `2px solid ${color}`,
+                    borderBottom: 'none'
                   }}
+                  data-value={formatter ? formatter(value) : value}
+                  data-label={item.date || item.label}
                 />
               </div>
             );

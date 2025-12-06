@@ -163,49 +163,34 @@ const Dashboard = () => {
         </div>
 
         {/* Charts Section */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', 
-          gap: '20px', 
-          marginTop: '40px' 
-        }}>
+        <div className="charts-section">
           {/* Revenue Chart */}
-          <div style={{ 
-            background: 'white', 
-            padding: '25px', 
-            borderRadius: '8px', 
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Icon name="dollarSign" size={20} color="#28a745" />
-                Doanh thu theo thời gian
-              </h2>
+          <div className="chart-card chart-card-revenue">
+            <div className="chart-header">
+              <div className="chart-title-wrapper">
+                <div className="chart-icon-wrapper chart-icon-revenue">
+                  <Icon name="dollarSign" size={24} color="#fff" />
+                </div>
+                <div>
+                  <h2 className="chart-title">Doanh thu theo thời gian</h2>
+                  <p className="chart-subtitle">Tổng doanh thu từ các đơn hàng</p>
+                </div>
+              </div>
               <select
                 value={chartPeriod}
                 onChange={(e) => setChartPeriod(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px'
-                }}
+                className="chart-period-select"
               >
                 <option value="7">7 ngày qua</option>
                 <option value="30">30 ngày qua</option>
                 <option value="365">1 năm qua</option>
               </select>
             </div>
-            <div style={{ height: '300px' }}>
+            <div className="chart-wrapper">
               <SimpleLineChart
                 data={revenueData}
                 dataKey="revenue"
-                color="#28a745"
+                color="#10b981"
                 label="Doanh thu"
                 formatter={(value) => formatCurrency(value)}
               />
@@ -213,21 +198,23 @@ const Dashboard = () => {
           </div>
 
           {/* Orders Chart */}
-          <div style={{ 
-            background: 'white', 
-            padding: '25px', 
-            borderRadius: '8px', 
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
-          }}>
-            <h2 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Icon name="shoppingCart" size={20} color="#ffc107" />
-              Số đơn hàng theo thời gian
-            </h2>
-            <div style={{ height: '300px' }}>
+          <div className="chart-card chart-card-orders">
+            <div className="chart-header">
+              <div className="chart-title-wrapper">
+                <div className="chart-icon-wrapper chart-icon-orders">
+                  <Icon name="shoppingCart" size={24} color="#fff" />
+                </div>
+                <div>
+                  <h2 className="chart-title">Số đơn hàng theo thời gian</h2>
+                  <p className="chart-subtitle">Tổng số đơn hàng đã hoàn thành</p>
+                </div>
+              </div>
+            </div>
+            <div className="chart-wrapper">
               <SimpleBarChart
                 data={revenueData}
                 dataKey="orders"
-                color="#ffc107"
+                color="#f59e0b"
                 label="Số đơn hàng"
                 formatter={(value) => `${Math.round(value)} đơn`}
               />

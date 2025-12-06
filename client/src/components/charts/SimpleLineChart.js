@@ -57,12 +57,31 @@ const SimpleLineChart = ({ data, dataKey, color = '#28a745', label, formatter })
             );
           })}
           
+          {/* Gradient definition */}
+          <defs>
+            <linearGradient id={`lineGradient-${color.replace('#', '')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.05" />
+            </linearGradient>
+            <linearGradient id={`lineStroke-${color.replace('#', '')}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={color} />
+              <stop offset="100%" stopColor={color} stopOpacity="0.7" />
+            </linearGradient>
+          </defs>
+          
+          {/* Area under line */}
+          <path
+            d={`${pathData} L ${points[points.length - 1].x} ${chartHeight} L ${points[0].x} ${chartHeight} Z`}
+            fill={`url(#lineGradient-${color.replace('#', '')})`}
+            opacity="0.6"
+          />
+          
           {/* Line */}
           <path
             d={pathData}
             fill="none"
-            stroke={color}
-            strokeWidth="2"
+            stroke={`url(#lineStroke-${color.replace('#', '')})`}
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -70,6 +89,17 @@ const SimpleLineChart = ({ data, dataKey, color = '#28a745', label, formatter })
           {/* Points */}
           {points.map((point, index) => (
             <g key={index}>
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r={pointRadius + 2}
+                fill="white"
+                stroke={color}
+                strokeWidth="2"
+                className="chart-point"
+                data-value={formatter ? formatter(point.value) : point.value}
+                data-label={point.label}
+              />
               <circle
                 cx={point.x}
                 cy={point.y}

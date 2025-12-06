@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 
 const PrivateRoute = ({ children, allowAdmin = true }) => {
   const { isAuthenticated, user, token, loading } = useSelector(state => state.auth);
-  
+
   // Kiểm tra token trong localStorage để biết có đang đăng nhập không
   const hasToken = token || localStorage.getItem('token');
 

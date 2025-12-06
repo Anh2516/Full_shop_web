@@ -52,7 +52,7 @@ router.get('/', verifyToken, requireAdmin, async (req, res) => {
           [user.id, 'topup', 'pending']
         );
         return {
-          ...user,
+        ...user,
           customer_code: await ensureCustomerCode(db, user.id, user.customer_code),
           pending_topup_count: pendingCount[0]?.count || 0
         };
