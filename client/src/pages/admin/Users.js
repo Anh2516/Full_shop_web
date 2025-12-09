@@ -183,7 +183,7 @@ const Users = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa user này?')) return;
     try {
-      await axios.delete(`/api/users/${id}`, {
+      await axios.delete(getApiUrl(`api/users/${id}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchUsers(debouncedSearch);
