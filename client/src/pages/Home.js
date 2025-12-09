@@ -22,7 +22,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="main-content">
+    <div className="main-content home-page">
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-background">

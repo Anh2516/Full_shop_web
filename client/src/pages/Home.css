@@ -2,6 +2,18 @@
    HERO SECTION - Modern Design
    ============================================ */
 
+.home-page {
+  padding-top: var(--spacing-4);
+  min-height: auto;
+  background: transparent;
+}
+.main-content.home-page {
+  /* Ghi đè padding mặc định 160px ở .main-content (App.css) */
+  padding-top: 80px;
+  padding-bottom: 0px;
+  min-height: auto;
+}
+
 .hero-section {
   position: relative;
   min-height: 90vh;
@@ -10,7 +22,8 @@
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   margin-bottom: var(--spacing-20);
-  padding: var(--spacing-20) 0;
+  /* Giảm padding top để nền áp sát navbar hơn */
+  padding: var(--spacing-8) 0 var(--spacing-20);
 }
 
 .hero-background {
