@@ -194,7 +194,7 @@ const Users = () => {
 
   const handleApproveTopup = async (transactionId) => {
     try {
-      const response = await axios.post(`/api/wallet/admin/${transactionId}/approve`, {}, {
+      const response = await axios.post(getApiUrl(`api/wallet/admin/${transactionId}/approve`), {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -234,7 +234,7 @@ const Users = () => {
     const reason = window.prompt('Lý do từ chối (có thể bỏ trống)', '');
     if (reason === null) return; // User cancelled
     try {
-      await axios.post(`/api/wallet/admin/${transactionId}/reject`, { reason }, {
+      await axios.post(getApiUrl(`api/wallet/admin/${transactionId}/reject`), { reason }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
