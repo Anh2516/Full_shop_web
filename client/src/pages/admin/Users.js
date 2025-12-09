@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateBalance } from '../../store/slices/authSlice';
+import { getApiUrl } from '../../config/api';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
 import BackButton from '../../components/common/BackButton';
@@ -32,7 +33,7 @@ const Users = () => {
 
   const fetchUsers = async (keyword = '') => {
     try {
-      const response = await axios.get('/api/users', {
+      const response = await axios.get(getApiUrl('api/users'), {
         headers: { Authorization: `Bearer ${token}` },
         params: keyword ? { search: keyword } : {}
       });
@@ -137,7 +138,7 @@ const Users = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('/api/users', submitData, {
+        await axios.post(getApiUrl('api/users'), submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -160,7 +161,7 @@ const Users = () => {
     setWalletModalOpen(true);
     setWalletLoading(true);
     try {
-      const response = await axios.get('/api/wallet/admin/pending', {
+      const response = await axios.get(getApiUrl('api/wallet/admin/pending'), {
         headers: { Authorization: `Bearer ${token}` },
         params: { userId: user.id }
       });

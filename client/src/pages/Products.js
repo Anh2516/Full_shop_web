@@ -6,6 +6,7 @@ import BackButton from '../components/common/BackButton';
 import './Products.css';
 import { formatCurrency } from '../utils/currency';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/products/categories/list');
+      const response = await axios.get(getApiUrl('api/products/categories/list'));
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Lỗi lấy categories:', error);
@@ -38,7 +39,7 @@ const Products = () => {
 
   const fetchBestSellers = async () => {
     try {
-      const response = await fetch('/api/products/best-sellers');
+      const response = await fetch(getApiUrl('api/products/best-sellers'));
       if (!response.ok) return;
       const data = await response.json();
       setBestSellers(data.bestSellers || []);

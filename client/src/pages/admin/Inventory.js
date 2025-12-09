@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { getApiUrl } from '../../config/api';
 import BackButton from '../../components/common/BackButton';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
@@ -33,7 +34,7 @@ const Inventory = () => {
     : {};
 
   const fetchEntries = async (keyword = '') => {
-    const response = await axios.get('/api/inventory', {
+    const response = await axios.get(getApiUrl('api/inventory'), {
       ...authHeader,
       params: keyword ? { search: keyword } : {}
     });
@@ -119,7 +120,7 @@ const Inventory = () => {
       if (editingEntry) {
         await axios.put(`/api/inventory/${editingEntry.id}`, payload, authHeader);
       } else {
-        await axios.post('/api/inventory', payload, authHeader);
+        await axios.post(getApiUrl('api/inventory'), payload, authHeader);
       }
       await fetchEntries(debouncedSearch);
       closeModal();

@@ -6,6 +6,7 @@ import Icon from '../../components/common/Icon';
 import SimpleLineChart from '../../components/charts/SimpleLineChart';
 import SimpleBarChart from '../../components/charts/SimpleBarChart';
 import BackButton from '../../components/common/BackButton';
+import { getApiUrl } from '../../config/api';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
 
@@ -28,7 +29,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get('/api/admin/stats', {
+        const response = await axios.get(getApiUrl('api/admin/stats'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats(response.data.stats);
@@ -45,7 +46,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRevenueChart = async () => {
       try {
-        const response = await axios.get(`/api/admin/revenue-chart?period=${chartPeriod}`, {
+        const response = await axios.get(getApiUrl(`api/admin/revenue-chart?period=${chartPeriod}`), {
           headers: { Authorization: `Bearer ${token}` }
         });
         // Format dữ liệu cho chart

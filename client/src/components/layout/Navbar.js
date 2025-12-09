@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import axios from 'axios';
+import { getApiUrl } from '../../config/api';
 import Icon from '../common/Icon';
 import './Navbar.css';
 import { formatCurrency } from '../../utils/currency';
@@ -40,7 +41,7 @@ const Navbar = () => {
     if (isAuthenticated && user?.role === 'admin' && token) {
       const fetchPendingCounts = async () => {
         try {
-          const response = await axios.get('/api/admin/stats', {
+          const response = await axios.get(getApiUrl('api/admin/stats'), {
             headers: { Authorization: `Bearer ${token}` }
           });
           setPendingTopupCount(response.data.stats.pendingTopupCount || 0);

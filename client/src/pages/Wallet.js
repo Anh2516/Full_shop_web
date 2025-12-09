@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../store/slices/authSlice';
 import { formatCurrency } from '../utils/currency';
+import { getApiUrl } from '../config/api';
 import './Wallet.css';
 import BackButton from '../components/common/BackButton';
 
@@ -30,7 +31,7 @@ const Wallet = () => {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/wallet', authHeader);
+      const response = await axios.get(getApiUrl('api/wallet'), authHeader);
       setTransactions(response.data.transactions || []);
     } catch (error) {
       console.error(error);
@@ -62,7 +63,7 @@ const Wallet = () => {
     if (!pendingTopup) return;
     setSubmitting(true);
     try {
-      const response = await axios.post('/api/wallet/topup', {
+      const response = await axios.post(getApiUrl('api/wallet/topup'), {
         amount: pendingTopup.amount,
         method: 'vietqr',
         note: user?.customer_code

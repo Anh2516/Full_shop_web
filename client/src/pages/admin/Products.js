@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, updateProduct, deleteProduct, toggleProductVisibility } from '../../store/slices/productSlice';
 import axios from 'axios';
+import { getApiUrl } from '../../config/api';
 import './Admin.css';
 import BackButton from '../../components/common/BackButton';
 import { formatCurrency } from '../../utils/currency';
@@ -47,7 +48,7 @@ const Products = () => {
   const fetchCategories = async () => {
     try {
       if (!token) return;
-      const response = await axios.get('/api/admin/categories', {
+      const response = await axios.get(getApiUrl('api/admin/categories'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCategories(response.data.categories);
@@ -371,7 +372,7 @@ const Products = () => {
                             const formData = new FormData();
                             formData.append('image', file);
                             
-                            const response = await axios.post('/api/upload/image', formData, {
+                            const response = await axios.post(getApiUrl('api/upload/image'), formData, {
                               headers: {
                                 Authorization: `Bearer ${token}`,
                                 'Content-Type': 'multipart/form-data'
@@ -429,7 +430,7 @@ const Products = () => {
                               const formData = new FormData();
                               formData.append('image', file);
                               
-                              const response = await axios.post('/api/upload/image', formData, {
+                              const response = await axios.post(getApiUrl('api/upload/image'), formData, {
                                 headers: {
                                   Authorization: `Bearer ${token}`,
                                   'Content-Type': 'multipart/form-data'
