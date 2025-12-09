@@ -118,7 +118,7 @@ const Inventory = () => {
       }
 
       if (editingEntry) {
-        await axios.put(`/api/inventory/${editingEntry.id}`, payload, authHeader);
+        await axios.put(getApiUrl(`api/inventory/${editingEntry.id}`), payload, authHeader);
       } else {
         await axios.post(getApiUrl('api/inventory'), payload, authHeader);
       }
@@ -134,7 +134,7 @@ const Inventory = () => {
   const handleDelete = async (entryId) => {
     if (!window.confirm('Xác nhận xóa phiếu nhập này?')) return;
     try {
-      await axios.delete(`/api/inventory/${entryId}`, authHeader);
+      await axios.delete(getApiUrl(`api/inventory/${entryId}`), authHeader);
       await fetchEntries(debouncedSearch);
     } catch (error) {
       alert(error.response?.data?.message || 'Không thể xóa phiếu nhập');

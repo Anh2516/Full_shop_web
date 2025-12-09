@@ -263,7 +263,14 @@ router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
     res.json({ product: updatedProduct[0], message: 'Cập nhật sản phẩm thành công' });
   } catch (error) {
     console.error('Lỗi cập nhật sản phẩm:', error);
-    res.status(500).json({ message: 'Lỗi server' });
+    // Kiểm tra nếu lỗi do giá trị quá lớn
+    if (error.message && error.message.includes('Out of range')) {
+      return res.status(400).json({ message: 'Giá sản phẩm quá lớn. Giá tối đa là 9,999,999,999.99 ₫' });
+    }
+    res.status(500).json({ 
+      message: error.message || 'Lỗi server',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
