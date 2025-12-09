@@ -28,41 +28,24 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (currentProduct) {
-      // Lấy danh sách ảnh gallery
-      const fetchImages = async () => {
-        try {
-          const response = await fetch(`/api/products/${id}/images`);
-          if (!response.ok) {
-            throw new Error('Không thể lấy ảnh');
-          }
-          const data = await response.json();
-          setGalleryImages(data.images || []);
-          // Set ảnh đầu tiên làm ảnh được chọn, hoặc ảnh đại diện nếu không có gallery
-          if (data.images && data.images.length > 0) {
-            setSelectedImage(data.images[0].url);
-          } else if (currentProduct.image) {
-            setSelectedImage(currentProduct.image);
-          } else {
-            setSelectedImage(null);
-          }
-        } catch (error) {
-          console.error('Lỗi lấy ảnh:', error);
-          // Nếu không có gallery, dùng ảnh đại diện
-          if (currentProduct.image) {
-            setSelectedImage(currentProduct.image);
-          } else {
-            setSelectedImage(null);
-          }
-          setGalleryImages([]);
-        }
-      };
-      fetchImages();
+      // Sử dụng images từ product object (đã được backend trả về)
+      const images = currentProduct.images || [];
+      setGalleryImages(images);
+      
+      // Set ảnh đầu tiên làm ảnh được chọn
+      if (images.length > 0) {
+        setSelectedImage(images[0].url);
+      } else if (currentProduct.image) {
+        setSelectedImage(currentProduct.image);
+      } else {
+        setSelectedImage(null);
+      }
     } else {
       // Clear images khi không có product
       setSelectedImage(null);
       setGalleryImages([]);
     }
-  }, [currentProduct, id]);
+  }, [currentProduct]);
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
@@ -122,7 +105,7 @@ const ProductDetail = () => {
             <div className="main-image">
               <img src={selectedImage || currentProduct.image || '/placeholder.jpg'} alt={currentProduct.name} />
             </div>
-            {galleryImages.length > 0 && (
+            {(galleryImages.length > 0 || currentProduct.image) && (
               <div className="image-gallery">
                 {currentProduct.image && (
                   <div
