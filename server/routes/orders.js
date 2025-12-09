@@ -183,7 +183,19 @@ router.get('/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
     }
 
-    res.json({ order: orders[0] });
+    const order = orders[0];
+    // Parse JSON_ARRAYAGG từ string thành array
+    if (order.items && typeof order.items === 'string') {
+      try {
+        order.items = JSON.parse(order.items);
+      } catch (e) {
+        order.items = [];
+      }
+    } else if (!order.items) {
+      order.items = [];
+    }
+
+    res.json({ order });
   } catch (error) {
     console.error('Lỗi lấy chi tiết đơn hàng:', error);
     res.status(500).json({ message: 'Lỗi server' });

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllOrders, updateOrderStatus } from '../../store/slices/orderSlice';
+import { getApiUrl } from '../../config/api';
 import BackButton from '../../components/common/BackButton';
 import './Admin.css';
 import { formatCurrency } from '../../utils/currency';
@@ -58,7 +59,7 @@ const Orders = () => {
     try {
       setDetailLoading(true);
       setSelectedOrderId(orderId);
-      const response = await axios.get(`/api/orders/admin/${orderId}`, {
+      const response = await axios.get(getApiUrl(`api/orders/admin/${orderId}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrderDetail(response.data.order);

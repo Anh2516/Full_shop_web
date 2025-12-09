@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMyOrders } from '../store/slices/orderSlice';
 import { formatCurrency } from '../utils/currency';
+import { getApiUrl } from '../config/api';
 import BackButton from '../components/common/BackButton';
 import './MyOrders.css';
 
@@ -20,7 +21,7 @@ const MyOrders = () => {
   const openDetail = async (orderId) => {
     try {
       setDetailLoading(true);
-      const response = await axios.get(`/api/orders/${orderId}`, {
+      const response = await axios.get(getApiUrl(`api/orders/${orderId}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedOrder(response.data.order);

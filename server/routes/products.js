@@ -32,7 +32,7 @@ const buildProductQuery = ({ category, search, limitNum, offset, includeHidden }
     query += ')';
   }
 
-  query += ' ORDER BY p.created_at DESC';
+  query += ' ORDER BY p.created_at ASC';
   query += ` LIMIT ${limitNum} OFFSET ${offset}`;
 
   return { query, params };
