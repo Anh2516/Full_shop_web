@@ -163,65 +163,8 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Charts Section */}
-        <div className="charts-section">
-          {/* Revenue Chart */}
-          <div className="chart-card chart-card-revenue">
-            <div className="chart-header">
-              <div className="chart-title-wrapper">
-                <div className="chart-icon-wrapper chart-icon-revenue">
-                  <Icon name="dollarSign" size={24} color="#fff" />
-                </div>
-                <div>
-                  <h2 className="chart-title">Doanh thu theo thời gian</h2>
-                  <p className="chart-subtitle">Tổng doanh thu từ các đơn hàng</p>
-                </div>
-              </div>
-              <select
-                value={chartPeriod}
-                onChange={(e) => setChartPeriod(e.target.value)}
-                className="chart-period-select"
-              >
-                <option value="7">7 ngày qua</option>
-                <option value="30">30 ngày qua</option>
-                <option value="365">1 năm qua</option>
-              </select>
-            </div>
-            <div className="chart-wrapper">
-              <SimpleLineChart
-                data={revenueData}
-                dataKey="revenue"
-                color="#10b981"
-                label="Doanh thu"
-                formatter={(value) => formatCurrency(value)}
-              />
-            </div>
-          </div>
 
-          {/* Orders Chart */}
-          <div className="chart-card chart-card-orders">
-            <div className="chart-header">
-              <div className="chart-title-wrapper">
-                <div className="chart-icon-wrapper chart-icon-orders">
-                  <Icon name="shoppingCart" size={24} color="#fff" />
-                </div>
-                <div>
-                  <h2 className="chart-title">Số đơn hàng theo thời gian</h2>
-                  <p className="chart-subtitle">Tổng số đơn hàng đã hoàn thành</p>
-                </div>
-              </div>
-            </div>
-            <div className="chart-wrapper">
-              <SimpleBarChart
-                data={revenueData}
-                dataKey="orders"
-                color="#f59e0b"
-                label="Số đơn hàng"
-                formatter={(value) => `${Math.round(value)} đơn`}
-              />
-            </div>
-          </div>
-        </div>
+
 
         {/* Best Sellers */}
         {bestSellers.length > 0 && (
